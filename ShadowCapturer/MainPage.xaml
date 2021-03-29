@@ -9,6 +9,14 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-
+        <StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Button x:Name="QueueIOCTLButton" Click="QueueIOCTLButton_Click">IOCTL Hold</Button>
+        <Button x:Name="DequeueIOCTLButton" Click="DequeueIOCTLButton_Click">IOCTL Release</Button>
+            <Button x:Name="TestIOCTLButton" Click="TestIOCTLButton_Click">IOCTL Test</Button>
+            <TextBlock x:Name="FuckBlock">sdfsdf</TextBlock>
+            <TextBlock x:Name="SendReceiveCountBlock"></TextBlock>
+            <TextBlock x:Name="ActuallQueueCountBlock"></TextBlock>
+        </StackPanel>
+        
     </Grid>
 </Page>

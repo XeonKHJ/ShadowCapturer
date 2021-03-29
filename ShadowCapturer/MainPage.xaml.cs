@@ -31,34 +31,83 @@ namespace ShadowCapturer
             var selector = CustomDevice.GetDeviceSelector(InterfaceGuid);
 
             // Create a device watcher to look for instances of the fx2 device interface
-            var m_Fx2Watcher = Windows.Devices.Enumeration.DeviceInformation.CreateWatcher(
+            var shadowDriverDeviceWatcher = Windows.Devices.Enumeration.DeviceInformation.CreateWatcher(
                             selector,
                             new string[] { "System.Devices.DeviceInstanceId" }
                             );
 
-            m_Fx2Watcher.Added += M_Fx2Watcher_Added;
-            m_Fx2Watcher.Removed += M_Fx2Watcher_Removed; ;
-            m_Fx2Watcher.Start();
+            shadowDriverDeviceWatcher.Added += ShadowDriverDeviceWatcher_Added;
+            shadowDriverDeviceWatcher.Removed += ShadowDriverDeviceWatcher_Removed; ;
+            shadowDriverDeviceWatcher.Start();
         }
         static public Guid InterfaceGuid { get; } = new Guid("45f22bb7-6bc3-4545-96ed-73de89c46e7d");
-        private void M_Fx2Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
+        private void ShadowDriverDeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
         {
             throw new NotImplementedException();
         }
 
-        private void M_Fx2Watcher_Added(DeviceWatcher sender, DeviceInformation args)
+        public CustomDevice ShadowDriverDevice { set; get; } = null;
+        private async void ShadowDriverDeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
             System.Diagnostics.Debug.WriteLine(args.Id);
-            SendIOCTL(args.Id);
+            ShadowDriverDevice = await CustomDevice.FromIdAsync(args.Id, DeviceAccessMode.ReadWrite, DeviceSharingMode.Exclusive);
+
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                FuckBlock.Text = "成功连接设备";
+            });
         }
 
         public static IOControlCode IOCTLShadowDriverStartWfp = new IOControlCode(0x00000012, 0x909, IOControlAccessMode.ReadWrite, IOControlBufferingMethod.DirectInput);
         public static IOControlCode IOCTLShadowDriverRequirePacketInfo = new IOControlCode(0x00000012, 0x910, IOControlAccessMode.Any, IOControlBufferingMethod.DirectInput);
         public static IOControlCode IOCTLShadowDriverRequirePacketInfoShit = new IOControlCode(0x00000012, 0x911, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
-        async void SendIOCTL(string id)
+        public static IOControlCode IOCTLShadowDriverInvertNotification = new IOControlCode(0x00000012, 0x921, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
+
+        private int _fuckme = 0;
+        async void SendIOCTL(IOControlCode controlCode)
         {
-            var device = await CustomDevice.FromIdAsync(id, DeviceAccessMode.ReadWrite, DeviceSharingMode.Exclusive);
-            var status = await device.SendIOControlAsync(IOCTLShadowDriverRequirePacketInfo, null, null);
+            if(ShadowDriverDevice != null)
+            {
+                if(controlCode == IOCTLShadowDriverInvertNotification)
+                {
+                    _fuckme++;
+                    await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        SendReceiveCountBlock.Text = _fuckme.ToString();
+                    });
+                }
+                
+                var status = await ShadowDriverDevice.SendIOControlAsync(controlCode, null, null);
+                await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    FuckBlock.Text = controlCode.ControlCode.ToString();
+                });
+                if (controlCode == IOCTLShadowDriverInvertNotification)
+                {
+                    _fuckme--;
+                    await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        SendReceiveCountBlock.Text = _fuckme.ToString();
+                    });
+                }
+
+
+            }
+        }
+
+        private void QueueIOCTLButton_Click(object sender, RoutedEventArgs e)
+        {
+            SendIOCTL(IOCTLShadowDriverInvertNotification);
+        }
+
+        private void DequeueIOCTLButton_Click(object sender, RoutedEventArgs e)
+        {
+            SendIOCTL(IOCTLShadowDriverRequirePacketInfoShit);
+        }
+
+        private void TestIOCTLButton_Click(object sender, RoutedEventArgs e)
+        {
+            SendIOCTL(IOCTLShadowDriverStartWfp);
         }
     }
 }
