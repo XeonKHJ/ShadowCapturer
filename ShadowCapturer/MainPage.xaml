@@ -13,8 +13,10 @@
         <Button x:Name="QueueIOCTLButton" Click="QueueIOCTLButton_Click">IOCTL Hold</Button>
         <Button x:Name="DequeueIOCTLButton" Click="DequeueIOCTLButton_Click">IOCTL Release</Button>
             <Button x:Name="TestIOCTLButton" Click="TestIOCTLButton_Click">IOCTL Test</Button>
+            <Button x:Name="GetVersionIOCTLButton" Click="GetVersionIOCTLButton_Click">Get Driver Version</Button>
             <TextBlock x:Name="FuckBlock">sdfsdf</TextBlock>
             <TextBlock x:Name="SendReceiveCountBlock"></TextBlock>
+            <TextBlock x:Name="DriverVersionBlock"></TextBlock>
             <TextBlock x:Name="ActuallQueueCountBlock"></TextBlock>
         </StackPanel>
         
