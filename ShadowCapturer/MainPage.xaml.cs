@@ -64,6 +64,8 @@ namespace ShadowCapturer
         public static IOControlCode IOCTLShadowDriverGetDriverVersion = new IOControlCode(0x00000012, 0x922, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
         public static IOControlCode IOCTLShadowDriverRequirePacketInfoShit = new IOControlCode(0x00000012, 0x911, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
         public static IOControlCode IOCTLShadowDriverInvertNotification = new IOControlCode(0x00000012, 0x921, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
+        //#define IOCTL_SHADOWDRIVER_APP_REGISTER					CTL_CODE(FILE_DEVICE_NETWORK, 0x901, METHOD_BUFFERED, FILE_ANY_ACCESS)
+        public static IOControlCode IOCTLShadowDriverAppRegister = new IOControlCode(0x00000012, 0x901, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
 
         private int _fuckme = 0;
         async void SendIOCTL(IOControlCode controlCode)
@@ -125,6 +127,18 @@ namespace ShadowCapturer
                 string outputString = Encoding.Unicode.GetString(outputBuffer);
                 DriverVersionBlock.Text = Encoding.Unicode.GetString(outputBuffer);
             });
+        }
+
+        private async void RegisterButton_Click(object sender, RoutedEventArgs e)
+        {
+            var outputBuffer = new byte[sizeof(int) + 50];
+            AppRegisterContext context = new AppRegisterContext
+            {
+                AppId = 15,
+                AppName = "ShadowCapturer"
+            };
+            await AppRegisterContext.WriteToStreamAsync(context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
+            var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverAppRegister, outputBuffer.AsBuffer(), null);
         }
     }
 }
