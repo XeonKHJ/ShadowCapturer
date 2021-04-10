@@ -68,11 +68,17 @@ namespace ShadowCapturer
         public static IOControlCode IOCTLShadowDriverAppRegister = new IOControlCode(0x00000012, 0x901, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
 
         private int _fuckme = 0;
+
+        AppRegisterContext _context = new AppRegisterContext
+        {
+            AppId = 15,
+            AppName = "ShadowCapturer"
+        };
         async void SendIOCTL(IOControlCode controlCode)
         {
-            if(ShadowDriverDevice != null)
+            if (ShadowDriverDevice != null)
             {
-                if(controlCode == IOCTLShadowDriverInvertNotification)
+                if (controlCode == IOCTLShadowDriverInvertNotification)
                 {
                     _fuckme++;
                     await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -97,19 +103,42 @@ namespace ShadowCapturer
                         SendReceiveCountBlock.Text = _fuckme.ToString();
                     });
                 }
-
-
             }
         }
 
-        private void QueueIOCTLButton_Click(object sender, RoutedEventArgs e)
+        private async void QueueIOCTLButton_Click(object sender, RoutedEventArgs e)
         {
-            SendIOCTL(IOCTLShadowDriverInvertNotification);
+
+            if (ShadowDriverDevice != null)
+            {
+                _fuckme++;
+                await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    SendReceiveCountBlock.Text = _fuckme.ToString();
+                });
+                var outputBuffer = new byte[sizeof(int) + 50];
+                await AppRegisterContext.WriteToStreamAsync(_context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
+
+                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverInvertNotification, outputBuffer.AsBuffer(), null);
+
+                _fuckme--;
+                await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    SendReceiveCountBlock.Text = _fuckme.ToString();
+                });
+            }
         }
 
-        private void DequeueIOCTLButton_Click(object sender, RoutedEventArgs e)
+        private async void DequeueIOCTLButton_Click(object sender, RoutedEventArgs e)
         {
-            SendIOCTL(IOCTLShadowDriverRequirePacketInfoShit);
+
+            if (ShadowDriverDevice != null)
+            {
+                var outputBuffer = new byte[sizeof(int) + 50];
+                await AppRegisterContext.WriteToStreamAsync(_context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
+
+                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverRequirePacketInfoShit, outputBuffer.AsBuffer(), null);
+            }
         }
 
         private void TestIOCTLButton_Click(object sender, RoutedEventArgs e)
@@ -132,12 +161,8 @@ namespace ShadowCapturer
         private async void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             var outputBuffer = new byte[sizeof(int) + 50];
-            AppRegisterContext context = new AppRegisterContext
-            {
-                AppId = 15,
-                AppName = "ShadowCapturer"
-            };
-            await AppRegisterContext.WriteToStreamAsync(context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
+
+            await AppRegisterContext.WriteToStreamAsync(_context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
             var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverAppRegister, outputBuffer.AsBuffer(), null);
         }
     }
