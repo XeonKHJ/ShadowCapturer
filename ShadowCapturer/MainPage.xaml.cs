@@ -62,8 +62,8 @@ namespace ShadowCapturer
         public static IOControlCode IOCTLShadowDriverStartWfp = new IOControlCode(0x00000012, 0x909, IOControlAccessMode.ReadWrite, IOControlBufferingMethod.DirectInput);
         public static IOControlCode IOCTLShadowDriverRequirePacketInfo = new IOControlCode(0x00000012, 0x910, IOControlAccessMode.Any, IOControlBufferingMethod.DirectInput);
         public static IOControlCode IOCTLShadowDriverGetDriverVersion = new IOControlCode(0x00000012, 0x922, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
-        public static IOControlCode IOCTLShadowDriverRequirePacketInfoShit = new IOControlCode(0x00000012, 0x911, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
-        public static IOControlCode IOCTLShadowDriverInvertNotification = new IOControlCode(0x00000012, 0x921, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
+        public static IOControlCode IOCTLShadowDriverDequeuePacketInfoShit = new IOControlCode(0x00000012, 0x911, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
+        public static IOControlCode IOCTLShadowDriverQueueNotification = new IOControlCode(0x00000012, 0x921, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
         //#define IOCTL_SHADOWDRIVER_APP_REGISTER					CTL_CODE(FILE_DEVICE_NETWORK, 0x901, METHOD_BUFFERED, FILE_ANY_ACCESS)
         public static IOControlCode IOCTLShadowDriverAppRegister = new IOControlCode(0x00000012, 0x901, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
 
@@ -78,7 +78,7 @@ namespace ShadowCapturer
         {
             if (ShadowDriverDevice != null)
             {
-                if (controlCode == IOCTLShadowDriverInvertNotification)
+                if (controlCode == IOCTLShadowDriverQueueNotification)
                 {
                     _fuckme++;
                     await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -95,7 +95,7 @@ namespace ShadowCapturer
                 {
                     FuckBlock.Text = controlCode.ControlCode.ToString();
                 });
-                if (controlCode == IOCTLShadowDriverInvertNotification)
+                if (controlCode == IOCTLShadowDriverQueueNotification)
                 {
                     _fuckme--;
                     await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -119,7 +119,7 @@ namespace ShadowCapturer
                 var outputBuffer = new byte[sizeof(int) + 50];
                 await AppRegisterContext.WriteToStreamAsync(_context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
 
-                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverInvertNotification, outputBuffer.AsBuffer(), null);
+                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverQueueNotification, outputBuffer.AsBuffer(), null);
 
                 _fuckme--;
                 await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -137,7 +137,7 @@ namespace ShadowCapturer
                 var outputBuffer = new byte[sizeof(int) + 50];
                 await AppRegisterContext.WriteToStreamAsync(_context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
 
-                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverRequirePacketInfoShit, outputBuffer.AsBuffer(), null);
+                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLShadowDriverDequeuePacketInfoShit, outputBuffer.AsBuffer(), null);
             }
         }
 

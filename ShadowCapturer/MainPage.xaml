@@ -10,7 +10,7 @@
 
     <Grid>
         <StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button x:Name="QueueIOCTLButton" Click="QueueIOCTLButton_Click">IOCTL Hold</Button>
+            <Button x:Name="QueueIOCTLButton" Click="QueueIOCTLButton_Click" >IOCTL Hold</Button>
             <Button x:Name="DequeueIOCTLButton" Click="DequeueIOCTLButton_Click">IOCTL Release</Button>
             <Button x:Name="TestIOCTLButton" Click="TestIOCTLButton_Click">IOCTL Test</Button>
             <Button x:Name="GetVersionIOCTLButton" Click="GetVersionIOCTLButton_Click">Get Driver Version</Button>

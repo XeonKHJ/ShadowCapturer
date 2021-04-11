@@ -9,6 +9,34 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="RegisterAppButton" Grid.Column="0" Grid.Row="0" Margin="10" Click="RegisterAppButton_Click">Register App</Button>
+                <Button x:Name="DeregisterAppButton" Grid.Column="0" Grid.Row="1" Margin="10" Click="DeregisterAppButton_Click">Deregister App</Button>
+                <Button x:Name="QueueIoctlButton" Grid.Column="0" Grid.Row="2" Margin="10" Click="QueueIoctlButton_Click">Queue a IOCTL</Button>
+                <Button x:Name="DequeueIoctlButton" Grid.Column="0" Grid.Row="3" Margin="10" Click="DequeueIoctlButton_Click">Dequeue a IOCTL</Button>
+                <Button x:Name="CheckQueuedIoctlCountButton" Grid.Column="0" Grid.Row="4" Margin="10" Click="CheckQueuedIoctlCountButton_Click">Check queued IOCTL count</Button>
+                <TextBlock x:Name="ConnectStatusBlock" Grid.Column="0" Grid.Row="5" Margin="10">Device Connect Status</TextBlock>
 
+                <TextBlock x:Name="RegisterAppResultBlock" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0" DataContext="{x:Bind ViewModel}" Text="{Binding AppRegisterStatus}"></TextBlock>
+                <TextBlock x:Name="DeregisterAppResultBlock" VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">DeregisterAppResultBlock</TextBlock>
+                <TextBlock x:Name="QueueIoctlResultBlock" VerticalAlignment="Center" Grid.Column="1" Grid.Row="2">QueueIoctlResultBlock</TextBlock>
+                <TextBlock x:Name="DequeueIoctlResultBlock" VerticalAlignment="Center" Grid.Column="1" Grid.Row="3">DequeueIoctlResultBlock</TextBlock>
+                <TextBlock x:Name="CheckQueuedIoctlCountResultBlock" VerticalAlignment="Center" Grid.Column="1" Grid.Row="4" DataContext="{x:Bind ViewModel}" Text="{Binding QueuedIOCTLCount}">CheckQueuedIoctlCountResultBlock</TextBlock>
+                <TextBlock x:Name="ConnectStatusResultBlock" Grid.Column="1" Grid.Row="5" Margin="10" Text="{Binding DeviceConnectStatus}" DataContext="{x:Bind ViewModel}"></TextBlock>
+            </Grid>
+        </StackPanel>
     </Grid>
 </Page>

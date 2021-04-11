@@ -120,9 +120,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AppRegisterContext.cs" />
+    <Compile Include="IOCTLs.cs" />
     <Compile Include="IOCTLTestPage.xaml.cs">
       <DependentUpon>IOCTLTestPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="IOCTLTestViewModel.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

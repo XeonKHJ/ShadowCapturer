@@ -66,7 +66,7 @@ namespace ShadowCapturer
                     // 当导航堆栈尚未还原时，导航到第一页，
                     // 并通过将所需信息作为导航参数传入来配置
                     // 参数
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(IOCTLTestPage), e.Arguments);
                 }
                 // 确保当前窗口处于活动状态
                 Window.Current.Activate();
@@ -96,5 +96,12 @@ namespace ShadowCapturer
             //TODO: 保存应用程序状态并停止任何后台活动
             deferral.Complete();
         }
+
+        static public AppRegisterContext AppRegisterContext { get; } = new AppRegisterContext
+        {
+            AppId = 15,
+            AppName = "ShadowCapturer"
+        };
+        static public Guid DeviceInterfaceGuid { get; } = new Guid("45f22bb7-6bc3-4545-96ed-73de89c46e7d");
     }
 }

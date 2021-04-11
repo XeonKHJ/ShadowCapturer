@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 
 namespace ShadowCapturer
 {
-    struct AppRegisterContext
+    public struct AppRegisterContext
     {
         public int AppId;
         public string AppName;
