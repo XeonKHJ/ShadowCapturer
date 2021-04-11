@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -45,6 +46,7 @@ namespace ShadowCapturer
             AppRegisterStatus = "Unchecked"
         };
         public CustomDevice ShadowDriverDevice { set; get; } = null;
+        public ObservableCollection<NetPacketViewModel> NetPacketViewModels = new ObservableCollection<NetPacketViewModel>() { new NetPacketViewModel { Content = "fuck" } };
         private void ShadowDriverDeviceWatcher_Removed(Windows.Devices.Enumeration.DeviceWatcher sender, Windows.Devices.Enumeration.DeviceInformationUpdate args)
         {
             ShadowDriverDevice = null;
@@ -93,9 +95,16 @@ namespace ShadowCapturer
         {
             if (ShadowDriverDevice != null)
             {
-                var outputBuffer = new byte[sizeof(int) + 50];
-                await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, outputBuffer.AsBuffer().AsStream().AsOutputStream());
-                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, outputBuffer.AsBuffer(), null);
+                var inputBuffer = new byte[sizeof(int) + 50];
+                var outputBuffer = new byte[2000];
+                await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
+                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+                NetPacketViewModel netPacketViewModel = new NetPacketViewModel();
+                for(int i = 0; i < 20; ++i)
+                {
+                    netPacketViewModel.Content += outputBuffer[i].ToString("X4");
+                }
+                NetPacketViewModels.Add(netPacketViewModel);
             }
         }
 
@@ -103,9 +112,10 @@ namespace ShadowCapturer
         {
             if (ShadowDriverDevice != null)
             {
-                var outputBuffer = new byte[sizeof(int) + 50];
-                await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, outputBuffer.AsBuffer().AsStream().AsOutputStream());
-                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverDequeueNotification, outputBuffer.AsBuffer(), null);
+                var inputBuffer = new byte[sizeof(int) + 50];
+                var outputBuffer = new byte[2000];
+                await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
+                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverDequeueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
             }
         }
 
@@ -120,6 +130,14 @@ namespace ShadowCapturer
             {
                 ViewModel.AppRegisterStatus = "Unregistered";
             });
+        }
+
+        private async void StartFilterButton_Click(object sender, RoutedEventArgs e)
+        {
+            var inputBuffer = new byte[sizeof(int) + 50];
+            var outputBuffer = new byte[2000];
+            await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
+            var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStartFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
         }
     }
 }
