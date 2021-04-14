@@ -55,7 +55,7 @@ namespace ShadowCapturer
 
             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                FuckBlock.Text = "成功连接设备";
+                //FuckBlock.Text = "成功连接设备";
             });
         }
 
@@ -83,7 +83,7 @@ namespace ShadowCapturer
                     _fuckme++;
                     await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        SendReceiveCountBlock.Text = _fuckme.ToString();
+                        //SendReceiveCountBlock.Text = _fuckme.ToString();
                     });
                 }
                 MemoryBuffer buffer = new MemoryBuffer(1000);
@@ -93,14 +93,14 @@ namespace ShadowCapturer
 
                 await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    FuckBlock.Text = controlCode.ControlCode.ToString();
+                    //FuckBlock.Text = controlCode.ControlCode.ToString();
                 });
                 if (controlCode == IOCTLShadowDriverQueueNotification)
                 {
                     _fuckme--;
                     await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        SendReceiveCountBlock.Text = _fuckme.ToString();
+                        //SendReceiveCountBlock.Text = _fuckme.ToString();
                     });
                 }
             }
@@ -114,7 +114,7 @@ namespace ShadowCapturer
                 _fuckme++;
                 await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    SendReceiveCountBlock.Text = _fuckme.ToString();
+                    //SendReceiveCountBlock.Text = _fuckme.ToString();
                 });
                 var outputBuffer = new byte[sizeof(int) + 50];
                 await AppRegisterContext.WriteToStreamAsync(_context, outputBuffer.AsBuffer().AsStream().AsOutputStream());
@@ -124,7 +124,7 @@ namespace ShadowCapturer
                 _fuckme--;
                 await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    SendReceiveCountBlock.Text = _fuckme.ToString();
+                    //SendReceiveCountBlock.Text = _fuckme.ToString();
                 });
             }
         }
@@ -154,7 +154,7 @@ namespace ShadowCapturer
             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 string outputString = Encoding.Unicode.GetString(outputBuffer);
-                DriverVersionBlock.Text = Encoding.Unicode.GetString(outputBuffer);
+                //DriverVersionBlock.Text = Encoding.Unicode.GetString(outputBuffer);
             });
         }
 

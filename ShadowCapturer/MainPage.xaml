@@ -9,23 +9,14 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button x:Name="QueueIOCTLButton" Click="QueueIOCTLButton_Click" >IOCTL Hold</Button>
-            <Button x:Name="DequeueIOCTLButton" Click="DequeueIOCTLButton_Click">IOCTL Release</Button>
-            <Button x:Name="TestIOCTLButton" Click="TestIOCTLButton_Click">IOCTL Test</Button>
-            <Button x:Name="GetVersionIOCTLButton" Click="GetVersionIOCTLButton_Click">Get Driver Version</Button>
-            <Button x:Name="RegisterButton" Click="RegisterButton_Click"></Button>
-            <TextBlock x:Name="FuckBlock">sdfsdf</TextBlock>
-            <TextBlock x:Name="SendReceiveCountBlock"></TextBlock>
-            <TextBlock x:Name="DriverVersionBlock"></TextBlock>
-            <TextBlock x:Name="ActuallQueueCountBlock"></TextBlock>
-            <DropDownButton x:Name="FilteringLayerButton">
-                <DropDownButton.Flyout>
-                    <MenuFlyout>
-                        
-                    </MenuFlyout>
-                </DropDownButton.Flyout>
-            </DropDownButton>
-        </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <MenuBar Grid.Row="0">
+            <MenuBarItem Tag="skdfs"></MenuBarItem>
+        </MenuBar>
     </Grid>
 </Page>
