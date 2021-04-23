@@ -10,7 +10,12 @@ namespace ShadowDriver.DriverCommunicator
    internal static class IOCTLs
     {
         //#define IOCTL_SHADOWDRIVER_START_WFP                    CTL_CODE(FILE_DEVICE_NETWORK, 0x909, METHOD_BUFFERED, FILE_ANY_ACCESS)
+        //开始过滤用的IOCTL
         public static IOControlCode IOCTLShadowDriverStartFiltering = new IOControlCode(0x00000012, 0x909, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
+
+        //#define IOCTL_SHADOWDRIVER_STOP_FILTERING               CTL_CODE(FILE_DEVICE_NETWORK, 0x912, METHOD_BUFFERED, FILE_ANY_ACCESS)
+        //停止过滤用的IOCTL
+        public static IOControlCode IOCTLShadowDriverStopFiltering = new IOControlCode(0x00000012, 0x912, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
 
         public static IOControlCode IOCTLShadowDriverRequirePacketInfo = new IOControlCode(0x00000012, 0x910, IOControlAccessMode.Any, IOControlBufferingMethod.DirectInput);
 

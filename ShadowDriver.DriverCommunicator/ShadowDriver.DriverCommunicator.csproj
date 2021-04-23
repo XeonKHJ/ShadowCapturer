@@ -121,7 +121,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppRegisterContext.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="FilterCondition.cs" />
+    <Compile Include="ShadowFilter.cs" />
     <Compile Include="IOCTLs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\ShadowDriver.DriverCommunicator.rd.xml" />

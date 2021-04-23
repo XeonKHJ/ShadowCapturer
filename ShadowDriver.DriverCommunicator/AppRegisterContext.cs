@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 
 namespace ShadowDriver.DriverCommunicator
 {
-    class AppRegisterContext
+    public class AppRegisterContext
     {
         public int AppId;
         public string AppName;

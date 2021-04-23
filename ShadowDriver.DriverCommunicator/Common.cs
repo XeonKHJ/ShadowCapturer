@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace ShadowDriver.DriverCommunicator
 {
-    public class ShadowFilter
+    static class Common
     {
-        public ShadowFilter(int appId, string appName)
-        {
-
-        }
+        static public Guid InterfaceGuid { get; } = new Guid("45f22bb7-6bc3-4545-96ed-73de89c46e7d");
     }
 }
