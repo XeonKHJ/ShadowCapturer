@@ -119,7 +119,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AppRegisterContext.cs" />
     <Compile Include="IOCTLs.cs" />
     <Compile Include="IOCTLTestPage.xaml.cs">
       <DependentUpon>IOCTLTestPage.xaml</DependentUpon>
@@ -129,7 +128,11 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="NetPacketViewModel.cs" />
+    <Compile Include="NetworkInterfaceViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WelcomePage.xaml.cs">
+      <DependentUpon>WelcomePage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -159,14 +162,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="WelcomePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.11</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls.DataGrid">
+      <Version>7.0.1</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="ShadowDriver.SCCD" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ShadowDriver.DriverCommunicator\ShadowDriver.DriverCommunicator.csproj">
+      <Project>{c6d50578-d72e-4e2a-bb0e-9f681e1fee85}</Project>
+      <Name>ShadowDriver.DriverCommunicator</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

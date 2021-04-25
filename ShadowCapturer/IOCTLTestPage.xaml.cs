@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShadowDriver.DriverCommunicator;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -27,19 +28,31 @@ namespace ShadowCapturer
         public IOCTLTestPage()
         {
             this.InitializeComponent();
-
-            var selector = CustomDevice.GetDeviceSelector(App.DeviceInterfaceGuid);
-
-            // Create a device watcher to look for instances of the fx2 device interface
-            var shadowDriverDeviceWatcher = Windows.Devices.Enumeration.DeviceInformation.CreateWatcher(
-                            selector,
-                            new string[] { "System.Devices.DeviceInstanceId" }
-                            );
-
-            shadowDriverDeviceWatcher.Added += ShadowDriverDeviceWatcher_Added;
-            shadowDriverDeviceWatcher.Removed += ShadowDriverDeviceWatcher_Removed; ;
-            shadowDriverDeviceWatcher.Start();
+            _filter = new ShadowFilter(App.AppRegisterContext.AppId, App.AppRegisterContext.AppName);
+            _filter.StartFilterWatcher();
+            _filter.FilterReady += Filter_FilterReady;
+            _filter.PacketReceived += Filter_PacketReceived;
         }
+
+        private async void Filter_FilterReady()
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                ViewModel.DeviceConnectStatus = "Connected";
+            });
+        }
+
+        private void Filter_PacketReceived(byte[] buffer)
+        {
+            NetPacketViewModel netPacketViewModel = new NetPacketViewModel();
+            for (int i = 0; i < 20; ++i)
+            {
+                netPacketViewModel.Content += buffer[i].ToString("X4");
+            }
+            NetPacketViewModels.Add(netPacketViewModel);
+        }
+
+        private ShadowFilter _filter;
         public IOCTLTestViewModel ViewModel { get; } = new IOCTLTestViewModel()
         {
             DeviceConnectStatus = "Disconnected",
@@ -56,7 +69,7 @@ namespace ShadowCapturer
         private async void ShadowDriverDeviceWatcher_Added(Windows.Devices.Enumeration.DeviceWatcher sender, Windows.Devices.Enumeration.DeviceInformation args)
         {
             ShadowDriverDevice = await CustomDevice.FromIdAsync(args.Id, DeviceAccessMode.ReadWrite, DeviceSharingMode.Exclusive);
-            if(ShadowDriverDevice != null)
+            if (ShadowDriverDevice != null)
             {
                 await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
@@ -65,79 +78,50 @@ namespace ShadowCapturer
             }
         }
 
-        private async void RegisterAppButton_Click(object sender, RoutedEventArgs e)
-        {
-            var outputBuffer = new byte[sizeof(int) + 50];
-            
-            await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, outputBuffer.AsBuffer().AsStream().AsOutputStream());
-            var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppRegister, outputBuffer.AsBuffer(), null);
-
-            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            {
-                ViewModel.AppRegisterStatus = "Registered";
-            });
-        }
-
         private async void CheckQueuedIoctlCountButton_Click(object sender, RoutedEventArgs e)
         {
-            var inputBuffer = new byte[sizeof(int) + 50];
-            var outputBuffer = new byte[sizeof(int)];
-            await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
-            var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverGetQueueInfo, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
-            
-            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            var result = await _filter.CheckQueuedIOCTLCounts();
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                ViewModel.QueuedIOCTLCount = BitConverter.ToInt32(outputBuffer, 0); ;
+                ViewModel.QueuedIOCTLCount = result;
             });
         }
 
-        private async void QueueIoctlButton_Click(object sender, RoutedEventArgs e)
+        private void StartFilterButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ShadowDriverDevice != null)
+            try
             {
-                var inputBuffer = new byte[sizeof(int) + 50];
-                var outputBuffer = new byte[2000];
-                await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
-                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
-                NetPacketViewModel netPacketViewModel = new NetPacketViewModel();
-                for(int i = 0; i < 20; ++i)
-                {
-                    netPacketViewModel.Content += outputBuffer[i].ToString("X4");
-                }
-                NetPacketViewModels.Add(netPacketViewModel);
+                _filter.StartFiltering();
+            }
+            catch(Exception exception)
+            {
+                DisplayException(exception);
             }
         }
 
-        private async void DequeueIoctlButton_Click(object sender, RoutedEventArgs e)
+        public async void DisplayException(Exception exception)
         {
-            if (ShadowDriverDevice != null)
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                var inputBuffer = new byte[sizeof(int) + 50];
-                var outputBuffer = new byte[2000];
-                await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
-                var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverDequeueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
-            }
-        }
-
-        private async void DeregisterAppButton_Click(object sender, RoutedEventArgs e)
-        {
-            var outputBuffer = new byte[sizeof(int) + 50];
-
-            await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, outputBuffer.AsBuffer().AsStream().AsOutputStream());
-            var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppDeregister, outputBuffer.AsBuffer(), null);
-
-            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            {
-                ViewModel.AppRegisterStatus = "Unregistered";
+                ErrorMessageBlock.Text = exception.Message;
+                ErrorMessageGrid.Visibility = Visibility.Visible;
             });
         }
 
-        private async void StartFilterButton_Click(object sender, RoutedEventArgs e)
+        private void RegisterAppButton_Click(object sender, RoutedEventArgs e)
         {
-            var inputBuffer = new byte[sizeof(int) + 50];
-            var outputBuffer = new byte[2000];
-            await AppRegisterContext.WriteToStreamAsync(App.AppRegisterContext, inputBuffer.AsBuffer().AsStream().AsOutputStream());
-            var status = await ShadowDriverDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStartFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            try
+            {
+                _filter.RegisterAppToDevice();   
+            }
+            catch(Exception exception)
+            {
+                DisplayException(exception);
+            }
+        }
+
+        private void DeregisterAppButton_Click(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

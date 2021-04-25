@@ -10,7 +10,10 @@ namespace ShadowDriver.DriverCommunicator
 {
     public class FilterCondition
     {
+        public FilteringLayer FilteringLayer { set; get; }
         public PhysicalAddress MacAddress { set; get; }
         public IPAddress IPAddress { set; get; }
+        public FilterMatchType MatchType { set; get; }
+        public AddressLocation AddressLocation { set; get; }
     }
 }

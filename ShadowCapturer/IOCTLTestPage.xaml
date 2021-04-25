@@ -8,12 +8,12 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="30">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <StackPanel>
+        <StackPanel Padding="30">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
@@ -30,8 +30,8 @@
                 </Grid.ColumnDefinitions>
                 <Button x:Name="RegisterAppButton" Grid.Column="0" Grid.Row="0" Margin="10" Click="RegisterAppButton_Click">Register App</Button>
                 <Button x:Name="DeregisterAppButton" Grid.Column="0" Grid.Row="1" Margin="10" Click="DeregisterAppButton_Click">Deregister App</Button>
-                <Button x:Name="QueueIoctlButton" Grid.Column="0" Grid.Row="2" Margin="10" Click="QueueIoctlButton_Click">Queue a IOCTL</Button>
-                <Button x:Name="DequeueIoctlButton" Grid.Column="0" Grid.Row="3" Margin="10" Click="DequeueIoctlButton_Click">Dequeue a IOCTL</Button>
+                <Button x:Name="QueueIoctlButton" Grid.Column="0" Grid.Row="2" Margin="10">Queue a IOCTL</Button>
+                <Button x:Name="DequeueIoctlButton" Grid.Column="0" Grid.Row="3" Margin="10">Dequeue a IOCTL</Button>
                 <Button x:Name="CheckQueuedIoctlCountButton" Grid.Column="0" Grid.Row="4" Margin="10" Click="CheckQueuedIoctlCountButton_Click">Check queued IOCTL count</Button>
                 <TextBlock x:Name="ConnectStatusBlock" Grid.Column="0" Grid.Row="5" Margin="10">Device Connect Status</TextBlock>
                 <Button x:Name="StartFilterButton" Grid.Column="0" Grid.Row="6" Margin="10" Click="StartFilterButton_Click">Start Filtering</Button>
@@ -50,5 +50,8 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <Grid x:Name="ErrorMessageGrid" Background="Red" VerticalAlignment="Bottom" Grid.ColumnSpan="2" Visibility="Collapsed">
+            <TextBlock x:Name="ErrorMessageBlock" Margin="5"></TextBlock>
+        </Grid>
     </Grid>
 </Page>
