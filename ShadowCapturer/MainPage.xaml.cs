@@ -63,7 +63,7 @@ namespace ShadowCapturer
                 MatchType = FilterMatchType.Equal
             };
 
-            _filter.AddFilteringCondition(filterCondition);
+            _filter.AddFilteringConditionAsync(filterCondition);
             _filter.StartFiltering();
         }
     }

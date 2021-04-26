@@ -30,7 +30,7 @@ namespace ShadowDriver.DriverCommunicator
                 return _appName;
             }
         }
-        public Guid SublayerKey { set; get; }
+        public Guid SublayerKey { set; get; } = new Guid("EF2CC0E4-20B2-4A1B-B4B2-AB53D0558DBD");
         public SortedDictionary<int, Guid> CalloutsKey { set; get; } = new SortedDictionary<int, Guid>
         { 
             { 0, new Guid("FCCBD974-12F1-449D-915D-87F43378E2D1") }, // 网络层IPv4发送通道回调
@@ -65,6 +65,12 @@ namespace ShadowDriver.DriverCommunicator
             }
 
             return result;
+        }
+
+        public byte[] SeralizeAppIdToByteArray()
+        {
+            byte[] intBytes = BitConverter.GetBytes(AppId);
+            return intBytes;
         }
     }
 }

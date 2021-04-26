@@ -13,5 +13,10 @@ namespace ShadowCapturer
         public string Id { set; get; }
         public string Name { set; get; }
         public string MacAddress { set; get; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", NetworkInterface.Name, NetworkInterface.GetPhysicalAddress().ToString());
+        }
     }
 }

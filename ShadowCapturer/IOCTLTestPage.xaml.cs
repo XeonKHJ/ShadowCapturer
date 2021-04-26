@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Devices.Custom;
 using Windows.Foundation;
@@ -28,12 +30,31 @@ namespace ShadowCapturer
         public IOCTLTestPage()
         {
             this.InitializeComponent();
+
+            var nics = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var nic in nics)
+            {
+                NetworkInterfaceViewModels.Add(new NetworkInterfaceViewModel
+                {
+                    Id = nic.Id,
+                    MacAddress = nic.GetPhysicalAddress().ToString(),
+                    Name = nic.Name,
+                    NetworkInterface = nic
+                });
+            }
+
             _filter = new ShadowFilter(App.AppRegisterContext.AppId, App.AppRegisterContext.AppName);
             _filter.StartFilterWatcher();
             _filter.FilterReady += Filter_FilterReady;
             _filter.PacketReceived += Filter_PacketReceived;
-        }
 
+            _dispatcherTimer = new DispatcherTimer()
+            {
+                Interval = new TimeSpan(0, 0, 3)
+            };
+            _dispatcherTimer.Tick += DispatcherTimer_Tick;
+        }
+        private DispatcherTimer _dispatcherTimer;
         private async void Filter_FilterReady()
         {
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -41,13 +62,13 @@ namespace ShadowCapturer
                 ViewModel.DeviceConnectStatus = "Connected";
             });
         }
-
+        public ObservableCollection<NetworkInterfaceViewModel> NetworkInterfaceViewModels { get; } = new ObservableCollection<NetworkInterfaceViewModel>();
         private void Filter_PacketReceived(byte[] buffer)
         {
             NetPacketViewModel netPacketViewModel = new NetPacketViewModel();
             for (int i = 0; i < 20; ++i)
             {
-                netPacketViewModel.Content += buffer[i].ToString("X4");
+                netPacketViewModel.Content += buffer[i].ToString("X4") + " ";
             }
             NetPacketViewModels.Add(netPacketViewModel);
         }
@@ -59,7 +80,7 @@ namespace ShadowCapturer
             AppRegisterStatus = "Unchecked"
         };
         public CustomDevice ShadowDriverDevice { set; get; } = null;
-        public ObservableCollection<NetPacketViewModel> NetPacketViewModels = new ObservableCollection<NetPacketViewModel>() { new NetPacketViewModel { Content = "fuck" } };
+        public ObservableCollection<NetPacketViewModel> NetPacketViewModels = new ObservableCollection<NetPacketViewModel>();
         private void ShadowDriverDeviceWatcher_Removed(Windows.Devices.Enumeration.DeviceWatcher sender, Windows.Devices.Enumeration.DeviceInformationUpdate args)
         {
             ShadowDriverDevice = null;
@@ -101,18 +122,54 @@ namespace ShadowCapturer
 
         public async void DisplayException(Exception exception)
         {
+            DispatcherTimer_Tick(null, null);
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 ErrorMessageBlock.Text = exception.Message;
                 ErrorMessageGrid.Visibility = Visibility.Visible;
             });
+            _dispatcherTimer.Start();
         }
 
-        private void RegisterAppButton_Click(object sender, RoutedEventArgs e)
+        private async void DispatcherTimer_Tick(object sender, object e)
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                ErrorMessageGrid.Visibility = Visibility.Collapsed;
+            });
+            _dispatcherTimer.Stop();
+        }
+
+        private async void RegisterAppButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                _filter.RegisterAppToDevice();   
+                await _filter.RegisterAppToDeviceAsync();
+            }
+            catch (Exception exception)
+            {
+                DisplayException(exception);
+            }
+        }
+
+        private async void DeregisterAppButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await _filter.DeregisterAppFromDeviceAsync();
+                NetPacketViewModels.Clear();
+            }
+            catch (Exception exception)
+            {
+                DisplayException(exception);
+            }
+        }
+
+        private async void StopFilteringButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await _filter.StopFilteringAsync();
             }
             catch(Exception exception)
             {
@@ -120,8 +177,88 @@ namespace ShadowCapturer
             }
         }
 
-        private void DeregisterAppButton_Click(object sender, RoutedEventArgs e)
+        private async void AddConditionButton_Click(object sender, RoutedEventArgs e)
         {
+            string layerString = (string)LayerBox.SelectedItem;
+            string directionString = (string)DirectionBox.SelectedItem;
+            string matchTypeString = (string)MatchTypeBox.SelectedItem;
+            string locationString = (string)LocationBox.SelectedItem;
+            FilterCondition filterCondition = new FilterCondition();
+            switch(layerString)
+            {
+                case "Network Layer":
+                    filterCondition.FilteringLayer = FilteringLayer.NetworkLayer;
+                    filterCondition.IPAddress = IPAddress.Parse(IPAddressBox.Text);
+                    filterCondition.IPMask = IPAddress.Parse(IPAddressMaskBox.Text);
+                    break;
+                case "Link Layer":
+                    filterCondition.FilteringLayer = FilteringLayer.LinkLayer;
+                    filterCondition.MacAddress = ((NetworkInterfaceViewModel)MacAddressBox.SelectedItem).NetworkInterface.GetPhysicalAddress();
+                    break;
+            }
+            switch(directionString)
+            {
+                case "In":
+                    filterCondition.PacketDirection = NetPacketDirection.In;
+                    break;
+                case "Out":
+                    filterCondition.PacketDirection = NetPacketDirection.Out;
+                    break;
+            }
+
+            switch(locationString)
+            {
+                case "Remote":
+                    filterCondition.AddressLocation = AddressLocation.Remote;
+                    break;
+                case "Local":
+                    filterCondition.AddressLocation = AddressLocation.Local;
+                    break;
+            }
+
+            switch(matchTypeString)
+            {
+                case "Equal":
+                    filterCondition.MatchType = FilterMatchType.Equal;
+                    break;
+            }
+
+            try
+            {
+                await _filter.AddFilteringConditionAsync(filterCondition);
+            }
+            catch(Exception exception)
+            {
+                DisplayException(exception);
+            }
+        }
+
+        private void LayerBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch((string)LayerBox.SelectedItem)
+            {
+                case "Link Layer":
+                    if(MacAddressBox != null)
+                    {
+                        MacAddressBox.Visibility = Visibility.Visible;
+                    }
+                    if(IPAddressBox != null)
+                    {
+                        IPAddressBox.Visibility = Visibility.Collapsed;
+                    }
+                    
+                    break;
+                case "Network Layer":
+                    if (MacAddressBox != null)
+                    {
+                        MacAddressBox.Visibility = Visibility.Collapsed;
+                    }
+                    if (IPAddressBox != null)
+                    {
+                        IPAddressBox.Visibility = Visibility.Visible;
+                    }
+                    break;
+            }
         }
     }
 }

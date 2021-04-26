@@ -13,7 +13,9 @@ namespace ShadowDriver.DriverCommunicator
         public FilteringLayer FilteringLayer { set; get; }
         public PhysicalAddress MacAddress { set; get; }
         public IPAddress IPAddress { set; get; }
+        public IPAddress IPMask { set; get; } = IPAddress.Parse("255.255.255.255");
         public FilterMatchType MatchType { set; get; }
         public AddressLocation AddressLocation { set; get; }
+        public NetPacketDirection PacketDirection { set; get; }
     }
 }

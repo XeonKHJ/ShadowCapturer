@@ -49,40 +49,68 @@ namespace ShadowDriver.DriverCommunicator
             shadowDriverDeviceWatcher.Removed += ShadowDriverDeviceWatcher_Removed; ;
             shadowDriverDeviceWatcher.Start();
         }
-        public async void RegisterAppToDevice()
+        public async Task RegisterAppToDeviceAsync()
         {
             var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
             byte[] outputBuffer = new byte[sizeof(int)];
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAddCondition, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
+            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppRegister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
             var status = BitConverter.ToInt32(outputBuffer, 0);
             if (status != 0)
             {
-                throw new Exception("Add Condition Error");
+                HandleError(status);
             }
         }
-        public async void AddFilteringCondition(FilterCondition condition)
+        public async Task AddFilteringConditionAsync(FilterCondition condition)
         {
             byte[] encodedNetLayer = BitConverter.GetBytes((int)condition.FilteringLayer);
             byte[] encodedMatchType = BitConverter.GetBytes((int)condition.MatchType);
             byte[] encodedAddressLocation = BitConverter.GetBytes((int)condition.AddressLocation);
-            byte[] filteringAddress = null;
+            byte[] encodedDirection = BitConverter.GetBytes((int)condition.PacketDirection);
+            byte[] encodedAddressFamily = new byte[sizeof(int)];
+            byte[] filteringAddressAndMask = new byte[32];
             switch (condition.FilteringLayer)
             {
                 case FilteringLayer.LinkLayer:
-                    filteringAddress = condition.MacAddress.GetAddressBytes();
+                    condition.MacAddress.GetAddressBytes().CopyTo(filteringAddressAndMask, 0);
                     break;
                 case FilteringLayer.NetworkLayer:
-                    filteringAddress = condition.IPAddress.GetAddressBytes();
+                    condition.IPAddress.GetAddressBytes().CopyTo(filteringAddressAndMask, 0);
+                    switch(condition.IPAddress.AddressFamily)
+                    {
+                        case System.Net.Sockets.AddressFamily.InterNetwork:
+                            if(BitConverter.IsLittleEndian)
+                            {
+                                Array.Reverse(filteringAddressAndMask, 0, 4);
+                            }
+                            condition.IPMask.GetAddressBytes().CopyTo(filteringAddressAndMask, 4);
+                            encodedAddressFamily = BitConverter.GetBytes((int)IpAddrFamily.IPv4);
+                            break;
+                        case System.Net.Sockets.AddressFamily.InterNetworkV6:
+                            condition.IPMask.GetAddressBytes().CopyTo(filteringAddressAndMask, 16);
+                            encodedAddressFamily = BitConverter.GetBytes((int)IpAddrFamily.IPv4);
+                            break;
+                    }
                     break;
             }
-            byte[] inputBuffer = new byte[Common.AppRegisterContextMaxSize + encodedNetLayer.Length + encodedMatchType.Length + encodedAddressLocation.Length + filteringAddress.Length];
-            var conditionBeginIndex = Common.AppRegisterContextMaxSize;
-            var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
-            contextBytes.CopyTo(inputBuffer, 0);
+
+            byte[] inputBuffer = new byte[6 * sizeof(int) + filteringAddressAndMask.Length];
+            
+            var contextBytes = _shadowRegisterContext.SeralizeAppIdToByteArray();
+
+            var conditionBeginIndex = 0;
+            contextBytes.CopyTo(inputBuffer, conditionBeginIndex);
+            conditionBeginIndex += contextBytes.Length;
             encodedNetLayer.CopyTo(inputBuffer, conditionBeginIndex);
-            encodedMatchType.CopyTo(inputBuffer, conditionBeginIndex + encodedNetLayer.Length);
-            encodedAddressLocation.CopyTo(inputBuffer, conditionBeginIndex + encodedNetLayer.Length + encodedMatchType.Length);
-            filteringAddress.CopyTo(inputBuffer, conditionBeginIndex + encodedNetLayer.Length + encodedMatchType.Length + encodedAddressLocation.Length);
+            conditionBeginIndex += encodedNetLayer.Length;
+            encodedMatchType.CopyTo(inputBuffer, conditionBeginIndex);
+            conditionBeginIndex += encodedMatchType.Length;
+            encodedAddressLocation.CopyTo(inputBuffer, conditionBeginIndex);
+            conditionBeginIndex += encodedAddressLocation.Length;
+            encodedDirection.CopyTo(inputBuffer, conditionBeginIndex);
+            conditionBeginIndex += encodedDirection.Length;
+            encodedAddressFamily.CopyTo(inputBuffer, conditionBeginIndex);
+            conditionBeginIndex += encodedAddressFamily.Length;
+            filteringAddressAndMask.CopyTo(inputBuffer, conditionBeginIndex);
 
             byte[] outputBuffer = new byte[sizeof(int)];
 
@@ -96,17 +124,15 @@ namespace ShadowDriver.DriverCommunicator
         }
         public async void StartFiltering()
         {
-            var inputBuffer = new byte[Common.AppRegisterContextMaxSize];
             var outputBuffer = new byte[sizeof(int)];
-
+            _isQueueingContinue = true;
             for (int i = 0; i < 20; ++i)
             {
-                InqueIOCTLForFurtherNotification();
+                InqueueIOCTLForFurtherNotification();
             }
 
-            var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
-            contextBytes.CopyTo(inputBuffer, 0);
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppRegister, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
+            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStartFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
 
             int status = BitConverter.ToInt32(outputBuffer, 0);
 
@@ -114,43 +140,69 @@ namespace ShadowDriver.DriverCommunicator
             {
                 throw new Exception("Filtering Start Error!");
             }
+            _isFilteringStarted = true;
         }
 
-        private async void InqueIOCTLForFurtherNotification()
+        public async Task DeregisterAppFromDeviceAsync()
         {
-            bool isQueueingContinue = true;
-            var inputBuffer = new byte[Common.AppRegisterContextMaxSize];
-            var outputBuffer = new byte[2000];
-
-            var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
-            contextBytes.CopyTo(inputBuffer, 0);
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
-
-            int status = BitConverter.ToInt32(outputBuffer, sizeof(int));
-
+            _isQueueingContinue = false;
+            _isFilteringStarted = false;
+            var contextBytes = _shadowRegisterContext.SeralizeAppIdToByteArray();
+            byte[] outputBuffer = new byte[sizeof(int)];
+            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppDeregister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
+            var status = BitConverter.ToInt32(outputBuffer, 0);
             if (status != 0)
             {
-                isQueueingContinue = false;
-                if (status != 1)
-                {
-                    HandleError(status, "Packet Recevied Error!");
-                }
+                HandleError(status);
             }
+        }
 
-            //通知
-            if (isQueueingContinue)
+        private bool _isQueueingContinue = false;
+        private async void InqueueIOCTLForFurtherNotification()
+        {
+            var outputBuffer = new byte[2000];
+
+            var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
+            while(_isQueueingContinue)
             {
-                InqueIOCTLForFurtherNotification();
-            }
+                try
+                {
+                    await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+                }
+                catch(NullReferenceException exception)
+                {
+                    _isQueueingContinue = false;
+                    break;
+                }
+                catch(Exception exception)
+                {
+                    System.Diagnostics.Debug.WriteLine(exception.Message);
+                }
 
+                int status = BitConverter.ToInt32(outputBuffer, 0);
+
+                if (status != 0)
+                {
+                    _isQueueingContinue = false;
+                    if (status != 1)
+                    {
+                        HandleError(status, "Packet Recevied Error!");
+                    }
+                }
+
+                if(_isFilteringStarted)
+                {
+                    PacketReceived?.Invoke(outputBuffer);
+                }
+
+            }
             return;
         }
 
         public async Task<int> CheckQueuedIOCTLCounts()
         {
-            var inputBuffer = new byte[Common.AppRegisterContextMaxSize];
             var outputBuffer = new byte[2 * sizeof(int)];
-            var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
+            var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
             await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverGetQueueInfo, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
             var status = BitConverter.ToInt32(outputBuffer, 0);
             if(status != 0)
@@ -160,19 +212,20 @@ namespace ShadowDriver.DriverCommunicator
             var result = BitConverter.ToInt32(outputBuffer, sizeof(int));
             return result;
         }
-        public async void StopFiltering()
+
+        bool _isFilteringStarted = false;
+        public async Task StopFilteringAsync()
         {
-            var inputBuffer = new byte[Common.AppRegisterContextMaxSize];
+            _isFilteringStarted = false;
             var outputBuffer = new byte[sizeof(int)];
+            _isQueueingContinue = false;
+            var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
+            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStopFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
 
-            var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
-            contextBytes.CopyTo(inputBuffer, 0);
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppRegister, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
-
-            int status = BitConverter.ToInt32(outputBuffer, sizeof(int));
+            int status = BitConverter.ToInt32(outputBuffer, 0);
             if (status != 0)
             {
-                throw new Exception("Stop filtering error");
+                HandleError(status, "Stop Filtering error");
             }
         }
 
