@@ -32,20 +32,34 @@ namespace ShadowCapturer
         {
             this.InitializeComponent();
 
-            _filter = new ShadowFilter(App.AppRegisterContext.AppId, App.AppRegisterContext.AppName);
+            _filter = new ShadowFilter(App.RandomAppIdGenerator.Next(), App.AppRegisterContext.AppName);
+            _filter.FilterReady += Filter_FilterReady;
             _filter.PacketReceived += Filter_PacketReceived;
         }
 
-        
-        private void Filter_PacketReceived(byte[] buffer)
+        private List<FilterCondition> _conditions = new List<FilterCondition>();
+        private async void Filter_FilterReady()
+        {
+            await _filter.RegisterAppToDeviceAsync();
+            foreach (var condition in _conditions)
+            {
+                await _filter.AddFilteringConditionAsync(condition);
+            }
+            await _filter.StartFiltering();
+        }
+
+        private async void Filter_PacketReceived(byte[] buffer)
         {
             var netPacketViewModel = new NetPacketViewModel();
-            for (int i = 0; i < 20; ++i)
+            for (int i = sizeof(int); i < buffer.Length; ++i)
             {
                 netPacketViewModel.Content += buffer[i].ToString("X4");
             }
 
-            NetPacketViewModels.Add(netPacketViewModel);
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                NetPacketViewModels.Add(netPacketViewModel);
+            });
         }
 
         ShadowFilter _filter;
@@ -55,16 +69,27 @@ namespace ShadowCapturer
             base.OnNavigatedTo(e);
 
             PhysicalAddress macAddress = (PhysicalAddress)(e.Parameter);
-            FilterCondition filterCondition = new FilterCondition
+            FilterCondition filterConditionOut = new FilterCondition
             {
                 AddressLocation = AddressLocation.Local,
                 FilteringLayer = FilteringLayer.LinkLayer,
                 MacAddress = macAddress,
-                MatchType = FilterMatchType.Equal
+                MatchType = FilterMatchType.Equal,
+                PacketDirection = NetPacketDirection.Out
+            };
+            var filterConditionIn = new FilterCondition
+            {
+                AddressLocation = AddressLocation.Local,
+                FilteringLayer = FilteringLayer.LinkLayer,
+                MacAddress = macAddress,
+                MatchType = FilterMatchType.Equal,
+                PacketDirection = NetPacketDirection.In
             };
 
-            _filter.AddFilteringConditionAsync(filterCondition);
-            _filter.StartFiltering();
+            _conditions.Add(filterConditionOut);
+            _conditions.Add(filterConditionIn);
+
+            _filter.StartFilterWatcher();
         }
     }
 }

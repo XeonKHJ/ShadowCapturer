@@ -120,16 +120,15 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="FilteringConditionViewModel.cs" />
-    <Compile Include="IOCTLs.cs" />
     <Compile Include="IOCTLTestPage.xaml.cs">
       <DependentUpon>IOCTLTestPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IOCTLTestViewModel.cs" />
+    <Compile Include="ViewModels\IOCTLTestViewModel.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="NetPacketViewModel.cs" />
-    <Compile Include="NetworkInterfaceViewModel.cs" />
+    <Compile Include="ViewModels\NetPacketViewModel.cs" />
+    <Compile Include="ViewModels\NetworkInterfaceViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WelcomePage.xaml.cs">
       <DependentUpon>WelcomePage.xaml</DependentUpon>

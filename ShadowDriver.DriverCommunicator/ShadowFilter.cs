@@ -31,7 +31,7 @@ namespace ShadowDriver.DriverCommunicator
         private async void ShadowDriverDeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
             System.Diagnostics.Debug.WriteLine(args.Id);
-            _shadowDevice = await CustomDevice.FromIdAsync(args.Id, DeviceAccessMode.ReadWrite, DeviceSharingMode.Exclusive);
+            _shadowDevice = await CustomDevice.FromIdAsync(args.Id, DeviceAccessMode.ReadWrite, DeviceSharingMode.Shared);
 
             IsFilterReady = true;
             FilterReady?.Invoke();
@@ -122,7 +122,7 @@ namespace ShadowDriver.DriverCommunicator
                 throw new Exception("Add Condition Error");
             }
         }
-        public async void StartFiltering()
+        public async Task StartFiltering()
         {
             var outputBuffer = new byte[sizeof(int)];
             _isQueueingContinue = true;
@@ -132,7 +132,15 @@ namespace ShadowDriver.DriverCommunicator
             }
 
             var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStartFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStartFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            }
+            catch(Exception exception)
+            {
+                throw exception;
+            }
 
             int status = BitConverter.ToInt32(outputBuffer, 0);
 
@@ -190,9 +198,13 @@ namespace ShadowDriver.DriverCommunicator
                     }
                 }
 
+                var packetSize = BitConverter.ToInt64(outputBuffer, sizeof(int));
+                byte[] packetBuffer = new byte[packetSize];
+                Array.Copy(outputBuffer, sizeof(int) + sizeof(long), packetBuffer, 0, packetSize);
+
                 if(_isFilteringStarted)
                 {
-                    PacketReceived?.Invoke(outputBuffer);
+                    PacketReceived?.Invoke(packetBuffer);
                 }
 
             }

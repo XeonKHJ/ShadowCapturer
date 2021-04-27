@@ -18,8 +18,12 @@
         <MenuBar Grid.Row="0">
             <MenuBarItem Tag="skdfs"></MenuBarItem>
         </MenuBar>
-        <ListView>
-            
+        <ListView Grid.Row="1" ItemsSource="{x:Bind NetPacketViewModels}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Content}" Margin="0" Padding="0"></TextBlock>
+                </DataTemplate>
+            </ListView.ItemTemplate>
         </ListView>
     </Grid>
 </Page>

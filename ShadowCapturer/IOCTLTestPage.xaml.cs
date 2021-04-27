@@ -43,7 +43,7 @@ namespace ShadowCapturer
                 });
             }
 
-            _filter = new ShadowFilter(App.AppRegisterContext.AppId, App.AppRegisterContext.AppName);
+            _filter = new ShadowFilter(App.RandomAppIdGenerator.Next(), App.AppRegisterContext.AppName);
             _filter.StartFilterWatcher();
             _filter.FilterReady += Filter_FilterReady;
             _filter.PacketReceived += Filter_PacketReceived;
@@ -66,7 +66,7 @@ namespace ShadowCapturer
         private void Filter_PacketReceived(byte[] buffer)
         {
             NetPacketViewModel netPacketViewModel = new NetPacketViewModel();
-            for (int i = 0; i < 20; ++i)
+            for (int i = 0; i < buffer.Length ; ++i)
             {
                 netPacketViewModel.Content += buffer[i].ToString("X4") + " ";
             }
@@ -108,11 +108,11 @@ namespace ShadowCapturer
             });
         }
 
-        private void StartFilterButton_Click(object sender, RoutedEventArgs e)
+        private async void StartFilterButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                _filter.StartFiltering();
+                await _filter.StartFiltering();
             }
             catch(Exception exception)
             {

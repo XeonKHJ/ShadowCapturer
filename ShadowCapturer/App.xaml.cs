@@ -6,8 +6,11 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -42,6 +45,7 @@ namespace ShadowCapturer
         {
             Frame rootFrame = Window.Current.Content as Frame;
 
+            _isAppLaunched = true;
             // 不要在窗口已包含内容时重复应用程序初始化，
             // 只需确保窗口处于活动状态
             if (rootFrame == null)
@@ -67,11 +71,43 @@ namespace ShadowCapturer
                     // 当导航堆栈尚未还原时，导航到第一页，
                     // 并通过将所需信息作为导航参数传入来配置
                     // 参数
-                    rootFrame.Navigate(typeof(IOCTLTestPage), e.Arguments);
+                    rootFrame.Navigate(_homePage, e.Arguments);
+                }
+                else
+                {
+                    OpenNewView(e.Arguments);
                 }
                 // 确保当前窗口处于活动状态
                 Window.Current.Activate();
             }
+        }
+
+        private Type _homePage = typeof(WelcomePage);
+        private bool _isAppLaunched = false;
+        public static Random RandomAppIdGenerator { get; } = new Random();
+        private async void OpenNewView(object paramater)
+        {
+            CoreApplicationView currentView;
+            if (_isAppLaunched)
+            {
+                currentView = CoreApplication.CreateNewView();
+            }
+            else
+            {
+                currentView = CoreApplication.GetCurrentView();
+                _isAppLaunched = true;
+            }
+            int newViewId = 0;
+            await currentView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                Frame frame = new Frame();
+                frame.Navigate(_homePage, paramater);
+                Window.Current.Content = frame;
+                Window.Current.Activate();
+
+                newViewId = ApplicationView.GetForCurrentView().Id;
+            });
+            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId);
         }
 
         /// <summary>
