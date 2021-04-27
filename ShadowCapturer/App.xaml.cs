@@ -82,7 +82,7 @@ namespace ShadowCapturer
             }
         }
 
-        private Type _homePage = typeof(WelcomePage);
+        private Type _homePage = typeof(IOCTLTestPage);
         private bool _isAppLaunched = false;
         public static Random RandomAppIdGenerator { get; } = new Random();
         private async void OpenNewView(object paramater)

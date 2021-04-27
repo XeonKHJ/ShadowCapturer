@@ -30,8 +30,8 @@ namespace ShadowDriver.DriverCommunicator
                 return _appName;
             }
         }
-        public Guid SublayerKey { set; get; } = Guid.NewGuid();
-        public SortedDictionary<int, Guid> CalloutsKey { set; get; } = new SortedDictionary<int, Guid>
+        internal Guid SublayerKey { set; get; } = Guid.NewGuid();
+        internal SortedDictionary<int, Guid> CalloutsKey { set; get; } = new SortedDictionary<int, Guid>
         { 
             { 0, Guid.NewGuid()}, // 网络层IPv4发送通道回调
             { 1, Guid.NewGuid() }, // 链路层发送通道

@@ -184,6 +184,7 @@ namespace ShadowDriver.DriverCommunicator
                 }
                 catch(Exception exception)
                 {
+                    _isQueueingContinue = false;
                     System.Diagnostics.Debug.WriteLine(exception.Message);
                 }
 

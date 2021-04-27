@@ -127,6 +127,8 @@
     <Compile Include="ShadowFilter.cs" />
     <Compile Include="IOCTLs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShadowFilterException.cs" />
+    <Compile Include="ShadowStatus.cs" />
     <EmbeddedResource Include="Properties\ShadowDriver.DriverCommunicator.rd.xml" />
   </ItemGroup>
   <ItemGroup>
