@@ -53,8 +53,21 @@ namespace ShadowDriver.DriverCommunicator
         {
             var contextBytes = _shadowRegisterContext.SeralizeToByteArray();
             byte[] outputBuffer = new byte[sizeof(int)];
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppRegister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
-            var status = BitConverter.ToInt32(outputBuffer, 0);
+
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppRegister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
+            }
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+
+            var status = BitConverter.ToUInt32(outputBuffer, 0);
             if (status != 0)
             {
                 HandleError(status);
@@ -114,22 +127,28 @@ namespace ShadowDriver.DriverCommunicator
 
             byte[] outputBuffer = new byte[sizeof(int)];
 
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAddCondition, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAddCondition, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            }
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
 
-            var status = BitConverter.ToInt32(outputBuffer, 0);
+            var status = BitConverter.ToUInt32(outputBuffer, 0);
             if (status != 0)
             {
-                throw new Exception("Add Condition Error");
+                throw new ShadowFilterException(status);
             }
         }
         public async Task StartFiltering()
         {
             var outputBuffer = new byte[sizeof(int)];
-            _isQueueingContinue = true;
-            for (int i = 0; i < 20; ++i)
-            {
-                InqueueIOCTLForFurtherNotification();
-            }
 
             var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
 
@@ -137,17 +156,28 @@ namespace ShadowDriver.DriverCommunicator
             {
                 await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStartFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
             }
-            catch(Exception exception)
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
             {
                 throw exception;
             }
 
-            int status = BitConverter.ToInt32(outputBuffer, 0);
+            uint status = BitConverter.ToUInt32(outputBuffer, 0);
 
             if (status != 0)
             {
-                throw new Exception("Filtering Start Error!");
+                throw new ShadowFilterException(status);
             }
+
+            _isQueueingContinue = true;
+            for (int i = 0; i < 20; ++i)
+            {
+                InqueueIOCTLForFurtherNotification();
+            }
+
             _isFilteringStarted = true;
         }
 
@@ -157,8 +187,21 @@ namespace ShadowDriver.DriverCommunicator
             _isFilteringStarted = false;
             var contextBytes = _shadowRegisterContext.SeralizeAppIdToByteArray();
             byte[] outputBuffer = new byte[sizeof(int)];
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppDeregister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
-            var status = BitConverter.ToInt32(outputBuffer, 0);
+
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppDeregister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
+            }
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+
+            var status = BitConverter.ToUInt32(outputBuffer, 0);
             if (status != 0)
             {
                 HandleError(status);
@@ -171,32 +214,33 @@ namespace ShadowDriver.DriverCommunicator
             var outputBuffer = new byte[2000];
 
             var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
+            uint ioctlResult = 0;
             while(_isQueueingContinue)
             {
                 try
                 {
-                    await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+                    ioctlResult = await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverQueueNotification, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
                 }
-                catch(NullReferenceException exception)
+                catch(NullReferenceException)
                 {
                     _isQueueingContinue = false;
-                    break;
+                    //throw new ShadowFilterException(0xC0090040);
                 }
                 catch(Exception exception)
                 {
                     _isQueueingContinue = false;
-                    System.Diagnostics.Debug.WriteLine(exception.Message);
+                    //System.Diagnostics.Debug.WriteLine(exception.Message);
                 }
 
-                int status = BitConverter.ToInt32(outputBuffer, 0);
+                uint status = BitConverter.ToUInt32(outputBuffer, 0);
 
                 if (status != 0)
                 {
                     _isQueueingContinue = false;
-                    if (status != 1)
-                    {
-                        HandleError(status, "Packet Recevied Error!");
-                    }
+                    //if (status != 1)
+                    //{
+                    //    HandleError(status);
+                    //}
                 }
 
                 var packetSize = BitConverter.ToInt64(outputBuffer, sizeof(int));
@@ -216,8 +260,21 @@ namespace ShadowDriver.DriverCommunicator
         {
             var outputBuffer = new byte[2 * sizeof(int)];
             var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverGetQueueInfo, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
-            var status = BitConverter.ToInt32(outputBuffer, 0);
+
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverGetQueueInfo, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            }
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+
+            var status = BitConverter.ToUInt32(outputBuffer, 0);
             if(status != 0)
             {
                 HandleError(status);
@@ -233,20 +290,32 @@ namespace ShadowDriver.DriverCommunicator
             var outputBuffer = new byte[sizeof(int)];
             _isQueueingContinue = false;
             var inputBuffer = _shadowRegisterContext.SeralizeAppIdToByteArray();
-            await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStopFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
 
-            int status = BitConverter.ToInt32(outputBuffer, 0);
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverStopFiltering, inputBuffer.AsBuffer(), outputBuffer.AsBuffer());
+            }
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+
+            uint status = BitConverter.ToUInt32(outputBuffer, 0);
             if (status != 0)
             {
-                HandleError(status, "Stop Filtering error");
+                HandleError(status);
             }
         }
 
-        private static void HandleError(int errorCode, string appendMessage = "")
+        private static void HandleError(uint errorCode)
         {
             if(errorCode != 0)
             {
-                throw new Exception(string.Format("{0}: {1}", errorCode, appendMessage));
+                throw new ShadowFilterException(errorCode);
             }
         }
         public delegate void PacketReceivedEventHandler(byte[] buffer);

@@ -8,17 +8,18 @@ namespace ShadowDriver.DriverCommunicator
 {
     public class ShadowFilterException : Exception
     {
-        public ShadowFilterException(Exception exception)
+        public ShadowFilterException(uint customizedNtstatus)
         {
-            this.HResult = exception.HResult;
+            _ntStatus = customizedNtstatus;
         }
 
+        private uint _ntStatus = 0;
         public override string Message
         {
             get
             {
                 string message = "Unknown error!";
-                switch((uint)HResult)
+                switch((uint)_ntStatus)
                 {
                     case 0xC0080001:
                         message = "The app is unregistered, access is not allowed.";
@@ -40,6 +41,9 @@ namespace ShadowDriver.DriverCommunicator
                         break;
                     case 0xC0090030:
                         message = "The feature is not yet implemented.";
+                        break;
+                    case 0xC0090040:
+                        message = "The filter is not ready.";
                         break;
                 }
 

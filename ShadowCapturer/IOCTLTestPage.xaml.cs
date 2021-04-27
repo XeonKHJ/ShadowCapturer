@@ -101,11 +101,22 @@ namespace ShadowCapturer
 
         private async void CheckQueuedIoctlCountButton_Click(object sender, RoutedEventArgs e)
         {
-            var result = await _filter.CheckQueuedIOCTLCounts();
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            try
             {
-                ViewModel.QueuedIOCTLCount = result;
-            });
+                var result = await _filter.CheckQueuedIOCTLCounts();
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    ViewModel.QueuedIOCTLCount = result;
+                });
+            }
+            catch(ShadowFilterException exception)
+            {
+                DisplayException(exception);
+            }
+            catch(Exception exception)
+            {
+                DisplayException(exception);
+            }
         }
 
         private async void StartFilterButton_Click(object sender, RoutedEventArgs e)

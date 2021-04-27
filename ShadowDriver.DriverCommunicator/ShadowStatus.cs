@@ -10,7 +10,7 @@ namespace ShadowDriver.DriverCommunicator
     {
         internal static void HandleException(Exception exception)
         {
-            throw new ShadowFilterException(exception);
+            //throw new ShadowFilterException(exception);
         }
     }
 }
