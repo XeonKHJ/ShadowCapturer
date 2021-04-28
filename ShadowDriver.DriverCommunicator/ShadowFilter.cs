@@ -241,6 +241,26 @@ namespace ShadowDriver.DriverCommunicator
             }
         }
 
+        public async void DeregisterAppFromDevice()
+        {
+            _isQueueingContinue = false;
+            _isFilteringStarted = false;
+            var contextBytes = _shadowRegisterContext.SeralizeAppIdToByteArray();
+            byte[] outputBuffer = new byte[sizeof(int)];
+
+            if(_shadowDevice != null)
+            {
+                try
+                {
+                    await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverAppDeregister, contextBytes.AsBuffer(), outputBuffer.AsBuffer());
+                }
+                catch (Exception)
+                {
+                    
+                }
+            }
+        }
+
         private bool _isQueueingContinue = false;
         private async void InqueueIOCTLForFurtherNotification()
         {

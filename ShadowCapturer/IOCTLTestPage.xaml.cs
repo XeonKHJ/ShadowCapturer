@@ -44,7 +44,10 @@ namespace ShadowCapturer
                     NetworkInterface = nic
                 });
             }
-            
+
+            var view = ApplicationView.GetForCurrentView();
+            view.Consolidated += View_Consolidated;
+
             _filter = new ShadowFilter(App.RandomAppIdGenerator.Next(), App.AppRegisterContext.AppName);
             _filter.StartFilterWatcher();
             _filter.FilterReady += Filter_FilterReady;
@@ -56,10 +59,15 @@ namespace ShadowCapturer
             };
             _dispatcherTimer.Tick += DispatcherTimer_Tick;
 
-            personalTest = ++countTest;
             System.Diagnostics.Debug.WriteLine(string.Format("Filter {0} loaded.", _filter.AppId));
         }
-        private int personalTest;
+
+        private void View_Consolidated(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
+        {
+            System.Diagnostics.Debug.WriteLine(string.Format("Deregistering app id {0}", _filter.AppId));
+            _filter.DeregisterAppFromDevice();
+        }
+
         private DispatcherTimer _dispatcherTimer;
         private async void Filter_FilterReady()
         {
