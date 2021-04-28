@@ -7,8 +7,8 @@
     <ProjectGuid>{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ShadowDriver.DriverCommunicator</RootNamespace>
-    <AssemblyName>ShadowDriver.DriverCommunicator</AssemblyName>
+    <RootNamespace>ShadowDriver.Core</RootNamespace>
+    <AssemblyName>ShadowDriver.Core.Univeresal</AssemblyName>
     <DefaultLanguage>zh-CN</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
@@ -121,9 +121,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppRegisterContext.cs" />
-    <Compile Include="Common.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="FilterCondition.cs" />
+    <Compile Include="DriverRelatedInformation.cs" />
     <Compile Include="ShadowFilter.cs" />
     <Compile Include="IOCTLs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -135,6 +133,12 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.11</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj">
+      <Project>{bafce331-b083-43ad-866d-523d827cedd2}</Project>
+      <Name>ShadowDriver.Core.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

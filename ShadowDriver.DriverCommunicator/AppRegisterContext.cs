@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
+using ShadowDriver.Core.Interface;
 
 namespace ShadowDriver.Core
 {
-    public class AppRegisterContext
+    public class AppRegisterContext : IAppRegisterContext
     {
         public int AppId { set; get; }
 
@@ -49,14 +50,14 @@ namespace ShadowDriver.Core
         internal byte[] SeralizeToByteArray()
         {
             // appid + 40 byte of name + 16 byte of sublayer key + 16 byte of callout key
-            byte[] result = new byte[Common.AppRegisterContextMaxSize + 16 + 16 * CalloutsKey.Count];
+            byte[] result = new byte[DriverRelatedInformation.AppRegisterContextMaxSize + 16 + 16 * CalloutsKey.Count];
             byte[] intBytes = BitConverter.GetBytes(AppId);
             byte[] nameBytes = Encoding.Unicode.GetBytes(AppName);
             byte[] sublayerKeyBytes = SublayerKey.ToByteArray();
             intBytes.CopyTo(result, 0);
             nameBytes.CopyTo(result, sizeof(int));
-            sublayerKeyBytes.CopyTo(result, Common.AppRegisterContextMaxSize);
-            var currentIndex = Common.AppRegisterContextMaxSize + 16;
+            sublayerKeyBytes.CopyTo(result, DriverRelatedInformation.AppRegisterContextMaxSize);
+            var currentIndex = DriverRelatedInformation.AppRegisterContextMaxSize + 16;
             foreach (var guid in CalloutsKey.Values)
             {
                 var guidBytes = guid.ToByteArray();

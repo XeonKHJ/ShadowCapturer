@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShadowCapturer", "ShadowCap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShadowDriver.Core.Universal", "ShadowDriver.DriverCommunicator\ShadowDriver.Core.Universal.csproj", "{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShadowDriver.Core.Common", "ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj", "{BAFCE331-B083-43AD-866D-523D827CEDD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,26 @@ Global
 		{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}.Release|x64.Build.0 = Release|x64
 		{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}.Release|x86.ActiveCfg = Release|x86
 		{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}.Release|x86.Build.0 = Release|x86
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|ARM.Build.0 = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|x64.Build.0 = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Debug|x86.Build.0 = Debug|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|ARM.ActiveCfg = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|ARM.Build.0 = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|ARM64.Build.0 = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|x64.ActiveCfg = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|x64.Build.0 = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|x86.ActiveCfg = Release|Any CPU
+		{BAFCE331-B083-43AD-866D-523D827CEDD2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

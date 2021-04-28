@@ -179,6 +179,10 @@
     <Content Include="ShadowDriver.SCCD" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj">
+      <Project>{bafce331-b083-43ad-866d-523d827cedd2}</Project>
+      <Name>ShadowDriver.Core.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ShadowDriver.DriverCommunicator\ShadowDriver.Core.Universal.csproj">
       <Project>{c6d50578-d72e-4e2a-bb0e-9f681e1fee85}</Project>
       <Name>ShadowDriver.Core.Universal</Name>

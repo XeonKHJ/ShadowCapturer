@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShadowDriver.Core.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Custom;
 using Windows.Devices.Enumeration;
+using ShadowDriver.Core.Interface;
 
 namespace ShadowDriver.Core
 {
-    public class ShadowFilter
+    public class ShadowFilter : IShadowFilter
     {
         private AppRegisterContext _shadowRegisterContext;
         private CustomDevice _shadowDevice;
@@ -46,7 +48,7 @@ namespace ShadowDriver.Core
 
         public void StartFilterWatcher()
         {
-            var selector = CustomDevice.GetDeviceSelector(Common.InterfaceGuid);
+            var selector = CustomDevice.GetDeviceSelector(DriverRelatedInformation.InterfaceGuid);
             var shadowDriverDeviceWatcher = DeviceInformation.CreateWatcher(
                 selector,
                 new string[] { "System.Devices.DeviceInstanceId" }
@@ -179,7 +181,7 @@ namespace ShadowDriver.Core
                 throw new ShadowFilterException(status);
             }
         }
-        public async Task StartFiltering()
+        public async Task StartFilteringAsync()
         {
             var outputBuffer = new byte[sizeof(int)];
 

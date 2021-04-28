@@ -1,4 +1,5 @@
 ﻿using ShadowDriver.Core;
+using ShadowDriver.Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -137,7 +138,7 @@ namespace ShadowCapturer
         {
             try
             {
-                await _filter.StartFiltering();
+                await _filter.StartFilteringAsync();
             }
             catch (Exception exception)
             {
