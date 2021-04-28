@@ -179,9 +179,9 @@
     <Content Include="ShadowDriver.SCCD" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ShadowDriver.DriverCommunicator\ShadowDriver.DriverCommunicator.csproj">
+    <ProjectReference Include="..\ShadowDriver.DriverCommunicator\ShadowDriver.Core.Universal.csproj">
       <Project>{c6d50578-d72e-4e2a-bb0e-9f681e1fee85}</Project>
-      <Name>ShadowDriver.DriverCommunicator</Name>
+      <Name>ShadowDriver.Core.Universal</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

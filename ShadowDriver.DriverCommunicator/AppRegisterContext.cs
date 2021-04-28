@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
 
-namespace ShadowDriver.DriverCommunicator
+namespace ShadowDriver.Core
 {
     public class AppRegisterContext
     {

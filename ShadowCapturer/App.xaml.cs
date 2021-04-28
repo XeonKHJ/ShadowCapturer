@@ -1,4 +1,4 @@
-﻿using ShadowDriver.DriverCommunicator;
+﻿using ShadowDriver.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;

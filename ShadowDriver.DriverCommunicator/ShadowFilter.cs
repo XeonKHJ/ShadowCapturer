@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Custom;
 using Windows.Devices.Enumeration;
 
-namespace ShadowDriver.DriverCommunicator
+namespace ShadowDriver.Core
 {
     public class ShadowFilter
     {

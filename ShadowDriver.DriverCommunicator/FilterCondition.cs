@@ -6,7 +6,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShadowDriver.DriverCommunicator
+namespace ShadowDriver.Core
 {
     public class FilterCondition
     {

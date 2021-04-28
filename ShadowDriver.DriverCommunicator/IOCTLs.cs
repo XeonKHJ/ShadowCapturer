@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Custom;
 
-namespace ShadowDriver.DriverCommunicator
+namespace ShadowDriver.Core
 {
    internal static class IOCTLs
     {

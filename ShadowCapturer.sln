@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShadowCapturer", "ShadowCapturer\ShadowCapturer.csproj", "{0C6DFEF0-7EC3-4650-92BC-4AC8FAF65448}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShadowDriver.DriverCommunicator", "ShadowDriver.DriverCommunicator\ShadowDriver.DriverCommunicator.csproj", "{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShadowDriver.Core.Universal", "ShadowDriver.DriverCommunicator\ShadowDriver.Core.Universal.csproj", "{C6D50578-D72E-4E2A-BB0E-9F681E1FEE85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
