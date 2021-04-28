@@ -10,6 +10,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Devices.Custom;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core.Preview;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -42,7 +44,7 @@ namespace ShadowCapturer
                     NetworkInterface = nic
                 });
             }
-
+            
             _filter = new ShadowFilter(App.RandomAppIdGenerator.Next(), App.AppRegisterContext.AppName);
             _filter.StartFilterWatcher();
             _filter.FilterReady += Filter_FilterReady;
@@ -53,7 +55,11 @@ namespace ShadowCapturer
                 Interval = new TimeSpan(0, 0, 3)
             };
             _dispatcherTimer.Tick += DispatcherTimer_Tick;
+
+            personalTest = ++countTest;
+            System.Diagnostics.Debug.WriteLine(string.Format("Filter {0} loaded.", _filter.AppId));
         }
+        private int personalTest;
         private DispatcherTimer _dispatcherTimer;
         private async void Filter_FilterReady()
         {
@@ -66,7 +72,7 @@ namespace ShadowCapturer
         private void Filter_PacketReceived(byte[] buffer)
         {
             NetPacketViewModel netPacketViewModel = new NetPacketViewModel();
-            for (int i = 0; i < buffer.Length ; ++i)
+            for (int i = 0; i < buffer.Length; ++i)
             {
                 netPacketViewModel.Content += buffer[i].ToString("X4") + " ";
             }
@@ -109,11 +115,11 @@ namespace ShadowCapturer
                     ViewModel.QueuedIOCTLCount = result;
                 });
             }
-            catch(ShadowFilterException exception)
+            catch (ShadowFilterException exception)
             {
                 DisplayException(exception);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 DisplayException(exception);
             }
@@ -125,7 +131,7 @@ namespace ShadowCapturer
             {
                 await _filter.StartFiltering();
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 DisplayException(exception);
             }
@@ -182,12 +188,12 @@ namespace ShadowCapturer
             {
                 await _filter.StopFilteringAsync();
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 DisplayException(exception);
             }
         }
-
+        static int countTest = 0;
         private async void AddConditionButton_Click(object sender, RoutedEventArgs e)
         {
             string layerString = (string)LayerBox.SelectedItem;
@@ -195,7 +201,7 @@ namespace ShadowCapturer
             string matchTypeString = (string)MatchTypeBox.SelectedItem;
             string locationString = (string)LocationBox.SelectedItem;
             FilterCondition filterCondition = new FilterCondition();
-            switch(layerString)
+            switch (layerString)
             {
                 case "Network Layer":
                     filterCondition.FilteringLayer = FilteringLayer.NetworkLayer;
@@ -207,7 +213,7 @@ namespace ShadowCapturer
                     filterCondition.MacAddress = ((NetworkInterfaceViewModel)MacAddressBox.SelectedItem).NetworkInterface.GetPhysicalAddress();
                     break;
             }
-            switch(directionString)
+            switch (directionString)
             {
                 case "In":
                     filterCondition.PacketDirection = NetPacketDirection.In;
@@ -217,7 +223,7 @@ namespace ShadowCapturer
                     break;
             }
 
-            switch(locationString)
+            switch (locationString)
             {
                 case "Remote":
                     filterCondition.AddressLocation = AddressLocation.Remote;
@@ -227,7 +233,7 @@ namespace ShadowCapturer
                     break;
             }
 
-            switch(matchTypeString)
+            switch (matchTypeString)
             {
                 case "Equal":
                     filterCondition.MatchType = FilterMatchType.Equal;
@@ -238,7 +244,7 @@ namespace ShadowCapturer
             {
                 await _filter.AddFilteringConditionAsync(filterCondition);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 DisplayException(exception);
             }
@@ -246,18 +252,18 @@ namespace ShadowCapturer
 
         private void LayerBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            switch((string)LayerBox.SelectedItem)
+            switch ((string)LayerBox.SelectedItem)
             {
                 case "Link Layer":
-                    if(MacAddressBox != null)
+                    if (MacAddressBox != null)
                     {
                         MacAddressBox.Visibility = Visibility.Visible;
                     }
-                    if(IPAddressBox != null)
+                    if (IPAddressBox != null)
                     {
                         IPAddressBox.Visibility = Visibility.Collapsed;
                     }
-                    
+
                     break;
                 case "Network Layer":
                     if (MacAddressBox != null)
@@ -270,6 +276,27 @@ namespace ShadowCapturer
                     }
                     break;
             }
+        }
+
+        private async void GetAppCountButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var count = await _filter.GetRegisterAppCount();
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    GetAppCountBlock.Text = count.ToString();
+                });
+            }
+            catch (Exception exception)
+            {
+                DisplayException(exception);
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
         }
     }
 }

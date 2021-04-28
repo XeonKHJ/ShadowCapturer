@@ -22,6 +22,13 @@ namespace ShadowDriver.DriverCommunicator
                 AppName = appName
             };
         }
+        public int AppId
+        {
+            get
+            {
+                return _shadowRegisterContext.AppId;
+            }
+        }
         public bool IsFilterReady { private set; get; } = false;
         private void ShadowDriverDeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
         {
@@ -31,8 +38,8 @@ namespace ShadowDriver.DriverCommunicator
         private async void ShadowDriverDeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
             System.Diagnostics.Debug.WriteLine(args.Id);
+            sender.Stop();
             _shadowDevice = await CustomDevice.FromIdAsync(args.Id, DeviceAccessMode.ReadWrite, DeviceSharingMode.Shared);
-
             IsFilterReady = true;
             FilterReady?.Invoke();
         }
@@ -48,6 +55,32 @@ namespace ShadowDriver.DriverCommunicator
             shadowDriverDeviceWatcher.Added += ShadowDriverDeviceWatcher_Added;
             shadowDriverDeviceWatcher.Removed += ShadowDriverDeviceWatcher_Removed; ;
             shadowDriverDeviceWatcher.Start();
+        }
+    
+        public async Task<int> GetRegisterAppCount()
+        {
+            byte[] outputBuffer = new byte[2 * sizeof(int)];
+            try
+            {
+                await _shadowDevice.SendIOControlAsync(IOCTLs.IOCTLShadowDriverGetRegisterdAppCount, null, outputBuffer.AsBuffer());
+            }
+            catch (NullReferenceException)
+            {
+                throw new ShadowFilterException(0xC0090040);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+
+            var status = BitConverter.ToUInt32(outputBuffer, 0);
+            if (status != 0)
+            {
+                HandleError(status);
+            }
+
+            var count = BitConverter.ToInt32(outputBuffer, sizeof(int));
+            return count;
         }
         public async Task RegisterAppToDeviceAsync()
         {

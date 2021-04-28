@@ -40,5 +40,7 @@ namespace ShadowDriver.DriverCommunicator
         //#define IOCTL_SHADOWDRIVER_ADD_CONDITION                CTL_CODE(FILE_DEVICE_NETWORK, 0x924, METHOD_BUFFERED, FILE_ANY_ACCESS)
         public static IOControlCode IOCTLShadowDriverAddCondition = new IOControlCode(0x00000012, 0x924, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
 
+        //#define IOCTL_SHADOWDRIVER_GET_REGISTERED_APP_COUNT     CTL_CODE(FILE_DEVICE_NETWORK, 0x925, METHOD_BUFFERED, FILE_ANY_ACCESS)
+        public static IOControlCode IOCTLShadowDriverGetRegisterdAppCount = new IOControlCode(0x00000012, 0x925, IOControlAccessMode.Any, IOControlBufferingMethod.Buffered);
     }
 }
