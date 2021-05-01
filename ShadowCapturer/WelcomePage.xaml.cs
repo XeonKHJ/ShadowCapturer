@@ -34,17 +34,13 @@ namespace ShadowCapturer
             {
                 NetworkInterfaceViewModels.Add(new NetworkInterfaceViewModel
                 {
-                    Id = nic.Id,
+                    Id = nic.GetIPProperties().GetIPv4Properties().Index,
                     MacAddress = nic.GetPhysicalAddress().ToString(),
                     Name = nic.Name,
                     NetworkInterface = nic
                 }) ;
             }
-            _shadowFilter = new ShadowFilter(App.AppRegisterContext.AppId, App.AppRegisterContext.AppName);
-            
         }
-
-        private ShadowFilter _shadowFilter;
         public ObservableCollection<NetworkInterfaceViewModel> NetworkInterfaceViewModels { get; } = new ObservableCollection<NetworkInterfaceViewModel>();
 
         private void NicsView_ItemClick(object sender, ItemClickEventArgs e)
@@ -52,7 +48,7 @@ namespace ShadowCapturer
             var nicViewModel = (NetworkInterfaceViewModel)e.ClickedItem;
             if(nicViewModel != null)
             {
-                this.Frame.Navigate(typeof(MainPage), nicViewModel.NetworkInterface.GetPhysicalAddress());
+                this.Frame.Navigate(typeof(MainPage), nicViewModel.NetworkInterface);
             }
         }
     }

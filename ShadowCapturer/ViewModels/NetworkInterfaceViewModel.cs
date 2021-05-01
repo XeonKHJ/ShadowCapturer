@@ -10,7 +10,7 @@ namespace ShadowCapturer
     public class NetworkInterfaceViewModel
     {
         public NetworkInterface NetworkInterface;
-        public string Id { set; get; }
+        public int Id { set; get; }
         public string Name { set; get; }
         public string MacAddress { set; get; }
 

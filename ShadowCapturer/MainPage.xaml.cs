@@ -12,6 +12,7 @@ using Windows.Devices.Custom;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -35,7 +36,10 @@ namespace ShadowCapturer
         {
             this.InitializeComponent();
 
-            _filter = new ShadowFilter(App.RandomAppIdGenerator.Next(), App.AppRegisterContext.AppName);
+            var view = ApplicationView.GetForCurrentView();
+            view.Consolidated += View_Consolidated;
+
+            _filter = new ShadowFilter(App.RandomAppIdGenerator.Next(), App.AppName);
             _filter.FilterReady += Filter_FilterReady;
             _filter.PacketReceived += Filter_PacketReceived;
         }
@@ -43,23 +47,22 @@ namespace ShadowCapturer
         private List<FilterCondition> _conditions = new List<FilterCondition>();
         private async void Filter_FilterReady()
         {
-            await _filter.RegisterAppToDeviceAsync();
+            await _filter.RegisterAppAsync();
             foreach (var condition in _conditions)
             {
-                await _filter.AddFilteringConditionAsync(condition);
+                await _filter.AddConditionAsync(condition);
             }
-            await _filter.StartFilteringAsync();
+            //await _filter.StartFilteringAsync();
         }
 
+        private int _packetIndex = 0;
         private async void Filter_PacketReceived(byte[] buffer)
         {
-            var netPacketViewModel = new NetPacketViewModel();
-            for (int i = sizeof(int); i < buffer.Length; ++i)
-            {
-                netPacketViewModel.Content += buffer[i].ToString("X4");
-            }
+            NetPacketParser.EthernetPacket packet = new NetPacketParser.EthernetPacket(buffer);
+            var netPacketViewModel = new NetPacketViewModel(packet, _packetIndex++);
 
-            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 NetPacketViewModels.Add(netPacketViewModel);
             });
@@ -71,28 +74,60 @@ namespace ShadowCapturer
         {
             base.OnNavigatedTo(e);
 
-            PhysicalAddress macAddress = (PhysicalAddress)(e.Parameter);
-            FilterCondition filterConditionOut = new FilterCondition
+            if(e.Parameter != null && e.Parameter is NetworkInterface)
             {
-                AddressLocation = AddressLocation.Local,
-                FilteringLayer = FilteringLayer.LinkLayer,
-                MacAddress = macAddress,
-                MatchType = FilterMatchType.Equal,
-                PacketDirection = NetPacketDirection.Out
-            };
-            var filterConditionIn = new FilterCondition
+                NetworkInterface netInterface = (NetworkInterface)(e.Parameter);
+                var ipv4Properties = netInterface.GetIPProperties().GetIPv4Properties();
+                FilterCondition filterConditionOut = new FilterCondition
+                {
+                    AddressLocation = AddressLocation.Local,
+                    FilteringLayer = FilteringLayer.LinkLayer,
+                    InterfaceIndex = (uint)ipv4Properties.Index,
+                    MatchType = FilterMatchType.Equal,
+                    PacketDirection = NetPacketDirection.Out
+                };
+                var filterConditionIn = new FilterCondition
+                {
+                    AddressLocation = AddressLocation.Local,
+                    FilteringLayer = FilteringLayer.LinkLayer,
+                    InterfaceIndex = (uint)ipv4Properties.Index,
+                    MatchType = FilterMatchType.Equal,
+                    PacketDirection = NetPacketDirection.In
+                };
+
+                _conditions.Add(filterConditionOut);
+                _conditions.Add(filterConditionIn);
+
+                _filter.StartFilterWatcher();
+            }
+        }
+
+        private void View_Consolidated(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
+        {
+            System.Diagnostics.Debug.WriteLine(string.Format("Deregistering app id {0}", _filter.AppId));
+            _filter.DeregisterApp();
+        }
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(e.AddedItems.First() is NetPacketViewModel viewModel)
             {
-                AddressLocation = AddressLocation.Local,
-                FilteringLayer = FilteringLayer.LinkLayer,
-                MacAddress = macAddress,
-                MatchType = FilterMatchType.Equal,
-                PacketDirection = NetPacketDirection.In
-            };
+                PacketDetailBlock.Text = viewModel.Content;
+            }
+        }
 
-            _conditions.Add(filterConditionOut);
-            _conditions.Add(filterConditionIn);
+        private async void StartCaptureButton_Click(object sender, RoutedEventArgs e)
+        {
+            await _filter.StartFilteringAsync();
+        }
 
-            _filter.StartFilterWatcher();
+        private async void StopCaptureButton_Click(object sender, RoutedEventArgs e)
+        {
+            await _filter.StopFilteringAsync();
+
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                NetPacketViewModels.Clear();
+            });
         }
     }
 }

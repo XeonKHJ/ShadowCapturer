@@ -119,11 +119,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FilteringConditionViewModel.cs" />
-    <Compile Include="IOCTLTestPage.xaml.cs">
-      <DependentUpon>IOCTLTestPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\IOCTLTestViewModel.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -154,10 +149,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="IOCTLTestPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -171,6 +162,9 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.11</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
+      <Version>7.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls.DataGrid">
       <Version>7.0.1</Version>
     </PackageReference>
@@ -179,13 +173,17 @@
     <Content Include="ShadowDriver.SCCD" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj">
-      <Project>{bafce331-b083-43ad-866d-523d827cedd2}</Project>
+    <ProjectReference Include="..\..\ShadowDriver\Library\ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj">
+      <Project>{4A28ED2F-BF1C-4203-A62C-D50B87837E28}</Project>
       <Name>ShadowDriver.Core.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ShadowDriver.Core.Universal\ShadowDriver.Core.Universal.csproj">
+    <ProjectReference Include="..\..\ShadowDriver\Library\ShadowDriver.Core.Universal\ShadowDriver.Core.Universal.csproj">
       <Project>{c6d50578-d72e-4e2a-bb0e-9f681e1fee85}</Project>
       <Name>ShadowDriver.Core.Universal</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShadowCapturer.NetPacketParser\ShadowCapturer.NetPacketParser.csproj">
+      <Project>{e59f7f5f-e48d-4fc3-8c17-ec7a65964fca}</Project>
+      <Name>ShadowCapturer.NetPacketParser</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

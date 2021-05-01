@@ -82,9 +82,10 @@ namespace ShadowCapturer
             }
         }
 
-        private Type _homePage = typeof(IOCTLTestPage);
+        private Type _homePage = typeof(WelcomePage);
         private bool _isAppLaunched = false;
         public static Random RandomAppIdGenerator { get; } = new Random();
+        public static string AppName { get; } = "ShadowDriver";
         private async void OpenNewView(object paramater)
         {
             CoreApplicationView currentView;
@@ -133,12 +134,6 @@ namespace ShadowCapturer
             //TODO: 保存应用程序状态并停止任何后台活动
             deferral.Complete();
         }
-
-        static public AppRegisterContext AppRegisterContext { get; } = new AppRegisterContext
-        {
-            AppId = 15,
-            AppName = "ShadowCapturer"
-        };
         static public Guid DeviceInterfaceGuid { get; } = new Guid("45f22bb7-6bc3-4545-96ed-73de89c46e7d");
     }
 }

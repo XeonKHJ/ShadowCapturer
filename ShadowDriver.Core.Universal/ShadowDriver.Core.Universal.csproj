@@ -125,8 +125,6 @@
     <Compile Include="ShadowFilter.cs" />
     <Compile Include="IOCTLs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShadowFilterException.cs" />
-    <Compile Include="ShadowStatus.cs" />
     <EmbeddedResource Include="Properties\ShadowDriver.DriverCommunicator.rd.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -135,8 +133,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj">
-      <Project>{bafce331-b083-43ad-866d-523d827cedd2}</Project>
+    <ProjectReference Include="..\..\ShadowDriver\Library\ShadowDriver.Core.Common\ShadowDriver.Core.Common.csproj">
+      <Project>{4a28ed2f-bf1c-4203-a62c-d50b87837e28}</Project>
       <Name>ShadowDriver.Core.Common</Name>
     </ProjectReference>
   </ItemGroup>
