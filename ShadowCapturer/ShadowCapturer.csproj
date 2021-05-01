@@ -122,6 +122,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ByteViewModel.cs" />
     <Compile Include="ViewModels\NetPacketViewModel.cs" />
     <Compile Include="ViewModels\NetworkInterfaceViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

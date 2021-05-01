@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ShadowCapturer"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls" xmlns:viewmodels="using:ShadowCapturer.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -14,6 +14,9 @@
         </DataTemplate>
         <DataTemplate x:Key="StopCaptureButtonTemplate">
             <SymbolIcon Symbol="Stop" Foreground="Red"></SymbolIcon>
+        </DataTemplate>
+        <DataTemplate x:Key="RestartCaptureButtonTemplate">
+            <SymbolIcon Symbol="Refresh" Foreground="Green"></SymbolIcon>
         </DataTemplate>
     </Page.Resources>
     
@@ -28,17 +31,18 @@
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button x:Name="StartCaptureButton" Click="StartCaptureButton_Click" Background="Transparent" ContentTemplate="{StaticResource StartCaptureButtonTemplate}">
                 </Button>
+                <Button x:Name="RestartCaptureButton" Click="RestartCaptureButton_Click" Background="Transparent" ContentTemplate="{StaticResource RestartCaptureButtonTemplate}"></Button>
                 <Button x:Name="StopCaptureButton" Click="StopCaptureButton_Click" Background="Transparent" ContentTemplate="{StaticResource StopCaptureButtonTemplate}"></Button>
             </StackPanel>
         </Viewbox>
-        <controls:DataGrid Grid.Row="1" ItemsSource="{x:Bind NetPacketViewModels}" HorizontalAlignment="Stretch" AutoGenerateColumns="False" SelectionChanged="DataGrid_SelectionChanged">
+        <controls:DataGrid Grid.Row="1" ItemsSource="{x:Bind NetPacketViewModels}" HorizontalAlignment="Stretch" CanUserResizeColumns="True" AutoGenerateColumns="False" SelectionChanged="DataGrid_SelectionChanged">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="No." Binding="{Binding Index}"></controls:DataGridTextColumn>
                 <controls:DataGridTextColumn Header="Time" Binding="{Binding ArriveTime}"></controls:DataGridTextColumn>
                 <controls:DataGridTextColumn Header="Source" Binding="{Binding SourceAddress}"></controls:DataGridTextColumn>
                 <controls:DataGridTextColumn Header="Destination" Binding="{Binding DestinationAddress}"></controls:DataGridTextColumn>
                 <controls:DataGridTextColumn Header="Protocal" Binding="{Binding EtherType}"></controls:DataGridTextColumn>
-                <controls:DataGridTextColumn Header="Size" Binding="{Binding PacketSize}"></controls:DataGridTextColumn>
+                <controls:DataGridTextColumn Header="Size" Width="*" Binding="{Binding PacketSize}"></controls:DataGridTextColumn>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
         <Grid Grid.Row="2">
@@ -46,7 +50,13 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="PacketDetailBlock" Grid.Column="0"></TextBlock>
+            <GridView x:Name="PacketDetailView" Grid.Column="0" ItemsSource="{x:Bind PacketDetailViewModel}" CharacterSpacing="0" Margin="0">
+                <GridView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock IsTextSelectionEnabled="True" Text="{Binding ByteString}" Padding="0" Margin="0" CharacterSpacing="0"></TextBlock>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
         </Grid>
     </Grid>
 </Page>

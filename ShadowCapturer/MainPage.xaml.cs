@@ -1,4 +1,5 @@
-﻿using ShadowDriver.Core;
+﻿using ShadowCapturer.ViewModels;
+using ShadowDriver.Core;
 using ShadowDriver.Core.Common;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace ShadowCapturer
             {
                 await _filter.AddConditionAsync(condition);
             }
-            //await _filter.StartFilteringAsync();
+            await _filter.StartFilteringAsync();
         }
 
         private int _packetIndex = 0;
@@ -102,6 +103,7 @@ namespace ShadowCapturer
             }
         }
 
+        public ObservableCollection<ByteViewModel> PacketDetailViewModel = new ObservableCollection<ByteViewModel>();
         private void View_Consolidated(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
         {
             System.Diagnostics.Debug.WriteLine(string.Format("Deregistering app id {0}", _filter.AppId));
@@ -109,10 +111,19 @@ namespace ShadowCapturer
         }
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.First() is NetPacketViewModel viewModel)
+            PacketDetailViewModel.Clear();
+            if(PacketDetailView.SelectedItems.Count != 0 || e.AddedItems.Count != 0)
             {
-                PacketDetailBlock.Text = viewModel.Content;
+                if (e.AddedItems.First() is NetPacketViewModel viewModel)
+                {
+                    var data = viewModel.Packet.OriginalData;
+                    for (int i = 0; i < data.Length; ++i)
+                    {
+                        PacketDetailViewModel.Add(new ByteViewModel(data[i]));
+                    }
+                }
             }
+
         }
 
         private async void StartCaptureButton_Click(object sender, RoutedEventArgs e)
@@ -128,6 +139,15 @@ namespace ShadowCapturer
             {
                 NetPacketViewModels.Clear();
             });
+
+            _packetIndex = 0;
+        }
+
+        private async void RestartCaptureButton_Click(object sender, RoutedEventArgs e)
+        {
+
+                NetPacketViewModels.Clear();
+            _packetIndex = 0;
         }
     }
 }
