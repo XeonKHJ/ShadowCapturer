@@ -57,16 +57,18 @@ namespace ShadowCapturer
         }
 
         private int _packetIndex = 0;
-        private async void Filter_PacketReceived(byte[] buffer)
+        private byte[] Filter_PacketReceived(byte[] buffer, CapturedPacketArgs args)
         {
             NetPacketParser.EthernetPacket packet = new NetPacketParser.EthernetPacket(buffer);
             var netPacketViewModel = new NetPacketViewModel(packet, _packetIndex++);
 
 
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
             {
                 NetPacketViewModels.Add(netPacketViewModel);
-            });
+            }).AsTask();
+
+            return null;
         }
 
         ShadowFilter _filter;
